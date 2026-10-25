@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+/* The rendered docs.
+ *
+ * Hand-written rather than a typography plugin: the whole page set is six
+ * markdown files whose shapes are known — headings, prose, tables, fenced
+ * code, the occasional blockquote. A plugin would be more CSS than the site
+ * has content, and would still need overriding to sit on a dark ground.
+ *
+ * Code blocks are left alone: Shiki emits its own inline colours at build
+ * time, so styling `pre code` here would fight it. */
+.doc {
+  color: var(--color-zinc-300);
+  line-height: 1.75;
+}
+.doc > * + * { margin-top: 1.15rem; }
+.doc h1 {
+  margin-top: 1.5rem;
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-zinc-50);
+}
+.doc h1 + * { margin-top: 1.5rem; }
+.doc h2 {
+  margin-top: 2.5rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-zinc-100);
+}
+.doc h3 {
+  margin-top: 2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-zinc-100);
+}
+.doc a {
+  color: var(--color-emerald-400);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.doc a:hover { color: var(--color-emerald-300); }
+.doc strong { color: var(--color-zinc-100); font-weight: 600; }
+.doc ul, .doc ol { padding-left: 1.25rem; }
+.doc ul { list-style: disc; }
+.doc ol { list-style: decimal; }
+.doc li + li { margin-top: 0.4rem; }
+.doc li::marker { color: var(--color-zinc-600); }
+.doc code {
+  border-radius: 0.25rem;
+  background: var(--color-zinc-800);
+  padding: 0.1rem 0.3rem;
+  font-size: 0.875em;
+  color: var(--color-zinc-200);
+}
+.doc pre {
+  overflow-x: auto;
+  border: 1px solid var(--color-zinc-800);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.doc pre code { background: none; padding: 0; font-size: inherit; }
+.doc blockquote {
+  border-left: 2px solid var(--color-zinc-700);
+  padding-left: 1rem;
+  color: var(--color-zinc-400);
+}
+/* Tables are the widest thing in api.md and must scroll rather than push the
+ * page sideways on a phone. */
+.doc table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.doc th, .doc td {
+  border: 1px solid var(--color-zinc-800);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+.doc th { color: var(--color-zinc-200); font-weight: 600; }
+.doc hr { border-color: var(--color-zinc-800); }
+
+/* A heading you can link to. The anchor is revealed on hover rather than
+ * always drawn: a column of § marks reads as clutter, and the affordance is
+ * only wanted at the moment someone means to copy a link. scroll-margin keeps
+ * the target clear of the sticky header when the anchor is followed. */
+.doc :is(h2, h3) {
+  position: relative;
+  scroll-margin-top: 5rem;
+}
+.doc :is(h2, h3) > a.anchor {
+  position: absolute;
+  left: -1.1rem;
+  text-decoration: none;
+  color: var(--color-zinc-700);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.doc :is(h2, h3):hover > a.anchor { opacity: 1; }
+.doc :is(h2, h3) > a.anchor:hover { color: var(--color-emerald-400); }
+
+/* The first table column in a reference doc is a field name, and every one of
+ * them is `code`. Keeping it from wrapping is what makes the tables in
+ * agents.md and flows.md scannable as a column rather than as prose. */
+.doc td:first-child code { white-space: nowrap; }

@@ -1,0 +1,75 @@
+---
+// The docs landing — public, indexable, and the same files the dashboard shows
+// to people who have signed up.
+//
+// It sits in the docs shell rather than beside it, so the tree on the left is
+// the same one every page has. What is left in the middle is the part an index
+// should be: the fastest path to running something, then the map.
+//
+// The grouping is editorial and comes from the docs index (index.ts); the titles and
+// summaries are read out of the markdown itself, so adding docs/foo.md puts a
+// card here with no code change.
+
+import Docs from "../layouts/Docs.astro";
+import { getCollection } from "astro:content";
+import { groupedDocs, docTitle, docSummary } from "../lib/docs.ts";
+
+const entries = await getCollection("docs");
+const bySlug = new Map(entries.map((e) => [e.id, e]));
+
+const groups = groupedDocs()
+  .map((g) => ({
+    ...g,
+    docs: g.slugs
+      .filter((slug) => bySlug.has(slug))
+      .map((slug) => {
+        const raw = bySlug.get(slug)!.body ?? "";
+        return { slug, title: docTitle(raw, slug), summary: docSummary(raw) };
+      }),
+  }))
+  .filter((g) => g.docs.length);
+---
+
+<Docs
+  title="Docs — foldrun"
+  description="Agents are just folders and flows are numbered lists, so there is no build step: edit, check, run, deploy. Start on your own machine — none of it needs an account."
+>
+  <div class="max-w-3xl">
+    <h1 class="text-4xl font-semibold tracking-tight text-zinc-50">Documentation</h1>
+    <p class="mt-4 leading-relaxed text-zinc-400">
+      Agents are just folders and flows are numbered lists, so there is no build
+      step: edit, check, run, deploy. Start on your own machine — none of it
+      needs an account.
+    </p>
+
+    <div
+      class="mt-8 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900 p-4 font-mono text-sm leading-relaxed text-zinc-300"
+    >
+      <pre><code>npm install -g foldrun
+
+foldrun init my-workspace     # a workspace that already runs
+foldrun check                 # validate everything — no model is called
+foldrun run publish           # run it, locally, for real</code></pre>
+    </div>
+
+    {
+      groups.map((group) => (
+        <section class="mt-12">
+          <h2 class="text-lg font-semibold tracking-tight text-zinc-100">{group.title}</h2>
+          <p class="mt-1.5 leading-relaxed text-zinc-400">{group.blurb}</p>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            {group.docs.map((doc) => (
+              <a
+                href={`/${doc.slug}/`}
+                class="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-600 hover:bg-zinc-900"
+              >
+                <h3 class="font-medium text-zinc-100">{doc.title}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">{doc.summary}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Docs>

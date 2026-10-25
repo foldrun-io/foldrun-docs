@@ -1,0 +1,213 @@
+---
+// The docs shell: a persistent index on the left, the prose in the middle, and
+// where you are in the current page on the right.
+//
+// Docs are read by jumping, not by scrolling top to bottom. The old page was a
+// single centered column, which meant every move between two documents went
+// back through the index — and a long reference like flows.md had no way to
+// see its own shape at all. The three columns are those two problems: the tree
+// is always there, and so is the current page's outline.
+//
+// The nav is built from the same grouping the index and the dashboard use, so
+// adding docs/foo.md puts it in the sidebar with no code change here.
+
+import Page from "./Page.astro";
+import { groupedDocs, docTitle } from "../lib/docs.ts";
+import { getCollection } from "astro:content";
+
+interface Props {
+  title: string;
+  description: string;
+  /** The doc being read, or undefined on the index. */
+  slug?: string;
+  /** Astro's own heading list, so the outline cannot disagree with the page. */
+  headings?: { depth: number; slug: string; text: string }[];
+}
+
+const { title, description, slug, headings = [] } = Astro.props;
+
+const entries = await getCollection("docs");
+const bySlug = new Map(entries.map((e) => [e.id, e]));
+const groups = groupedDocs()
+  .map((g) => ({
+    ...g,
+    docs: g.slugs
+      .filter((s) => bySlug.has(s))
+      .map((s) => ({ slug: s, title: docTitle(bySlug.get(s)!.body ?? "", s) })),
+  }))
+  .filter((g) => g.docs.length);
+
+// Reading order is the sidebar's order, so "next" means the next thing a
+// person would read rather than the next file alphabetically.
+const flat = groups.flatMap((g) => g.docs);
+const here = flat.findIndex((d) => d.slug === slug);
+const prev = here > 0 ? flat[here - 1] : null;
+const next = here >= 0 && here < flat.length - 1 ? flat[here + 1] : null;
+const group = groups.find((g) => g.docs.some((d) => d.slug === slug));
+
+// h2 and h3 only: h1 is the page title, and h4 down is detail the outline
+// would turn into noise.
+const outline = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+<Page title={title} description={description} wide>
+  <div class="flex gap-10 py-10">
+    <!-- Left: every doc, always. Sticky below the header on desktop; a
+         disclosure on small screens, where a permanent tree costs more room
+         than it gives. -->
+    <nav class="hidden w-56 shrink-0 lg:block">
+      <div class="sticky top-8 max-h-[calc(100vh-6rem)] overflow-y-auto pb-8">
+        <a
+          href="/"
+          class:list={[
+            "block text-sm font-medium",
+            slug ? "text-zinc-400 hover:text-zinc-100" : "text-zinc-100",
+          ]}
+        >
+          Documentation
+        </a>
+        {
+          groups.map((g) => (
+            <div class="mt-6">
+              <p class="text-[0.7rem] font-medium uppercase tracking-wider text-zinc-500">
+                {g.title}
+              </p>
+              <ul class="mt-2 space-y-0.5">
+                {g.docs.map((d) => (
+                  <li>
+                    <a
+                      href={`/${d.slug}/`}
+                      class:list={[
+                        "-ml-px block border-l py-1 pl-3 text-sm transition",
+                        d.slug === slug
+                          ? "border-emerald-400 font-medium text-emerald-400"
+                          : "border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-100",
+                      ]}
+                    >
+                      {d.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </nav>
+
+    <div class="min-w-0 flex-1">
+      <details class="mb-8 rounded-lg border border-zinc-800 bg-zinc-900/60 lg:hidden">
+        <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-zinc-300">
+          Browse docs
+        </summary>
+        <div class="border-t border-zinc-800 px-4 py-3">
+          {
+            groups.map((g) => (
+              <div class="mt-3 first:mt-0">
+                <p class="text-[0.7rem] font-medium uppercase tracking-wider text-zinc-500">
+                  {g.title}
+                </p>
+                <ul class="mt-1.5 space-y-1">
+                  {g.docs.map((d) => (
+                    <li>
+                      <a
+                        href={`/${d.slug}/`}
+                        class:list={[
+                          "text-sm",
+                          d.slug === slug ? "text-emerald-400" : "text-zinc-400",
+                        ]}
+                      >
+                        {d.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </details>
+
+      {
+        slug && (
+          <p class="mb-6 flex items-center gap-2 text-xs text-zinc-500">
+            <a href="/" class="hover:text-zinc-300">
+              Docs
+            </a>
+            {group && <span class="text-zinc-700">/</span>}
+            {group && <span>{group.title}</span>}
+          </p>
+        )
+      }
+
+      <slot />
+
+      <script is:inline>
+        // Astro gives every heading an id; this turns each one into something
+        // a reader can copy a link to. Inline and tiny on purpose — a docs
+        // page should not ship a bundle to do this.
+        for (const h of document.querySelectorAll(".doc h2[id], .doc h3[id]")) {
+          const a = document.createElement("a");
+          a.className = "anchor";
+          a.href = "#" + h.id;
+          a.setAttribute("aria-label", "Link to this section");
+          a.textContent = "#";
+          h.prepend(a);
+        }
+      </script>
+
+      {
+        (prev || next) && (
+          <nav class="mt-14 grid gap-3 border-t border-zinc-800 pt-6 sm:grid-cols-2">
+            {prev ? (
+              <a
+                href={`/${prev.slug}/`}
+                class="rounded-lg border border-zinc-800 px-4 py-3 transition hover:border-zinc-600"
+              >
+                <span class="text-xs text-zinc-500">Previous</span>
+                <span class="mt-0.5 block text-sm font-medium text-zinc-200">{prev.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next && (
+              <a
+                href={`/${next.slug}/`}
+                class="rounded-lg border border-zinc-800 px-4 py-3 text-right transition hover:border-zinc-600 sm:col-start-2"
+              >
+                <span class="text-xs text-zinc-500">Next</span>
+                <span class="mt-0.5 block text-sm font-medium text-zinc-200">{next.title}</span>
+              </a>
+            )}
+          </nav>
+        )
+      }
+    </div>
+
+    <!-- Right: the current page's own shape. Only where there is room for it
+         and something to show — a two-heading outline is a distraction. -->
+    {
+      outline.length > 2 && (
+        <aside class="hidden w-52 shrink-0 xl:block">
+          <div class="sticky top-8 max-h-[calc(100vh-6rem)] overflow-y-auto pb-8">
+            <p class="text-[0.7rem] font-medium uppercase tracking-wider text-zinc-500">
+              On this page
+            </p>
+            <ul class="mt-3 space-y-1.5">
+              {outline.map((h) => (
+                <li class={h.depth === 3 ? "pl-3" : ""}>
+                  <a
+                    href={`#${h.slug}`}
+                    class="block text-sm leading-snug text-zinc-500 transition hover:text-zinc-200"
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      )
+    }
+  </div>
+</Page>

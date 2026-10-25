@@ -1,0 +1,119 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>foldrun — account tree</title>
+<style>
+  :root { --account:#7c3aed; --workspace:#2563eb; --agent:#059669; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#fafafa; color:#111827; padding:48px 24px 80px;
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; }
+  h1 { font-size:26px; letter-spacing:-.02em; margin:0 0 4px; }
+  .lede { color:#6b7280; margin:0 0 28px; }
+  .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:22px 24px; }
+  .row { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px;
+    line-height:1.95; white-space:pre; display:flex; align-items:baseline; }
+  .g { color:#cbd5e1; }
+  .n { font-weight:600; }
+  .n.file { font-weight:400; color:#4b5563; }
+  .scope-account.dir { color:var(--account); }
+  .scope-workspace.dir { color:var(--workspace); }
+  .scope-agent.dir { color:var(--agent); }
+  .note { font-family:-apple-system,sans-serif; font-size:12px; color:#9ca3af;
+    margin-left:14px; white-space:normal; }
+  .legend { display:flex; flex-wrap:wrap; gap:20px; margin:22px 0 0; font-size:13px; color:#6b7280; }
+  .legend b { font-weight:600; }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+  .rule { margin-top:26px; padding:16px 20px; border-left:3px solid #e5e7eb; background:#fff;
+    border-radius:0 10px 10px 0; }
+  .rule p { margin:0 0 6px; }
+  code { font-family:ui-monospace,monospace; font-size:12.5px; background:#f3f4f6;
+    padding:1px 5px; border-radius:4px; }
+</style></head><body><div class="wrap">
+<h1>One account, one workspace, four agents</h1>
+<p class="lede">Three scopes, three real directories. The nesting <em>is</em> the inheritance.</p>
+
+<div class="card">
+<div class="row"><span class="n scope-account dir">default/</span><span class="note">the account — one company, one bill, one shared library</span></div>
+<div class="row"><span class="g">├─ </span><span class="n scope-account dir">library/</span><span class="note">reaches every workspace and agent below</span></div>
+<div class="row"><span class="g">│  ├─ </span><span class="n scope-account dir">knowledge/</span><span class="note">what you gave them · OKF bundle</span></div>
+<div class="row"><span class="g">│  │  └─ </span><span class="n scope-account file">legal.md</span></div>
+<div class="row"><span class="g">│  ├─ </span><span class="n scope-account dir">memory/</span><span class="note">what they learned · OKF bundle</span></div>
+<div class="row"><span class="g">│  │  └─ </span><span class="n scope-account file">company.md</span></div>
+<div class="row"><span class="g">│  ├─ </span><span class="n scope-account dir">scripts/</span><span class="note">code the tools run</span></div>
+<div class="row"><span class="g">│  │  └─ </span><span class="n scope-account file">slugify.py</span></div>
+<div class="row"><span class="g">│  ├─ </span><span class="n scope-account dir">skills/</span><span class="note">how a task is done · Agent Skills</span></div>
+<div class="row"><span class="g">│  │  └─ </span><span class="n scope-account dir">plain-english/</span></div>
+<div class="row"><span class="g">│  │     ├─ </span><span class="n scope-account dir">assets/</span></div>
+<div class="row"><span class="g">│  │     │  └─ </span><span class="n scope-account file">post-template.md</span></div>
+<div class="row"><span class="g">│  │     ├─ </span><span class="n scope-account dir">references/</span></div>
+<div class="row"><span class="g">│  │     │  └─ </span><span class="n scope-account file">banned-words.md</span></div>
+<div class="row"><span class="g">│  │     └─ </span><span class="n scope-account file">SKILL.md</span></div>
+<div class="row"><span class="g">│  └─ </span><span class="n scope-account dir">tools/</span><span class="note">what they can call · http, script, mcp</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-account file">everything-mcp.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-account file">slugify.md</span></div>
+<div class="row"><span class="g">│     └─ </span><span class="n scope-account file">uuid-service.md</span></div>
+<div class="row"><span class="g">├─ </span><span class="n scope-account dir">workspaces/</span><span class="note">one folder per trust boundary</span></div>
+<div class="row"><span class="g">│  └─ </span><span class="n scope-workspace dir">demo/</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">agents/</span><span class="note">one folder per role</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-agent dir">checker/</span></div>
+<div class="row"><span class="g">│     │  │  ├─ </span><span class="n scope-agent dir">memory/</span><span class="note">what they learned · OKF bundle</span></div>
+<div class="row"><span class="g">│     │  │  └─ </span><span class="n scope-agent file">agent.md</span><span class="note">identity: model, tools, secrets</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-agent dir">publisher/</span></div>
+<div class="row"><span class="g">│     │  │  ├─ </span><span class="n scope-agent dir">scripts/</span><span class="note">code the tools run</span></div>
+<div class="row"><span class="g">│     │  │  │  └─ </span><span class="n scope-agent file">frontmatter.py</span></div>
+<div class="row"><span class="g">│     │  │  └─ </span><span class="n scope-agent file">agent.md</span><span class="note">identity: model, tools, secrets</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-agent dir">researcher/</span></div>
+<div class="row"><span class="g">│     │  │  ├─ </span><span class="n scope-agent dir">memory/</span><span class="note">what they learned · OKF bundle</span></div>
+<div class="row"><span class="g">│     │  │  │  └─ </span><span class="n scope-agent file">past-topics.md</span></div>
+<div class="row"><span class="g">│     │  │  ├─ </span><span class="n scope-agent dir">skills/</span><span class="note">how a task is done · Agent Skills</span></div>
+<div class="row"><span class="g">│     │  │  │  └─ </span><span class="n scope-agent dir">topic-brief/</span></div>
+<div class="row"><span class="g">│     │  │  │     └─ </span><span class="n scope-agent file">SKILL.md</span></div>
+<div class="row"><span class="g">│     │  │  └─ </span><span class="n scope-agent file">agent.md</span><span class="note">identity: model, tools, secrets</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-agent dir">writer/</span></div>
+<div class="row"><span class="g">│     │     ├─ </span><span class="n scope-agent dir">knowledge/</span><span class="note">what you gave them · OKF bundle</span></div>
+<div class="row"><span class="g">│     │     │  └─ </span><span class="n scope-agent file">style-guide.md</span></div>
+<div class="row"><span class="g">│     │     ├─ </span><span class="n scope-agent dir">memory/</span><span class="note">what they learned · OKF bundle</span></div>
+<div class="row"><span class="g">│     │     │  └─ </span><span class="n scope-agent file">learned-tone.md</span></div>
+<div class="row"><span class="g">│     │     └─ </span><span class="n scope-agent file">agent.md</span><span class="note">identity: model, tools, secrets</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">evals/</span><span class="note">tests: did the prompt edit make it worse?</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">researcher-quality.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">flows/</span><span class="note">orchestration — who runs, in what order</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-workspace file">on-request.md</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-workspace file">publish.md</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-workspace file">sign-off.md</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">weekly.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">knowledge/</span><span class="note">what you gave them · OKF bundle</span></div>
+<div class="row"><span class="g">│     │  ├─ </span><span class="n scope-workspace dir">gauges/</span></div>
+<div class="row"><span class="g">│     │  │  ├─ </span><span class="n scope-workspace file">rg-100.md</span></div>
+<div class="row"><span class="g">│     │  │  └─ </span><span class="n scope-workspace file">weekly-sales.md</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">products.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">memory/</span><span class="note">what they learned · OKF bundle</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">audience.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">scripts/</span><span class="note">code the tools run</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">wordcount.py</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">skills/</span><span class="note">how a task is done · Agent Skills</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace dir">seo-checklist/</span></div>
+<div class="row"><span class="g">│     │     └─ </span><span class="n scope-workspace file">SKILL.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">state/</span><span class="note">survives runs and deploys</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">counters.json</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace dir">tools/</span><span class="note">what they can call · http, script, mcp</span></div>
+<div class="row"><span class="g">│     │  └─ </span><span class="n scope-workspace file">uuid-local.md</span></div>
+<div class="row"><span class="g">│     ├─ </span><span class="n scope-workspace file">AGENTS.md</span><span class="note">shared context + config · Linux Foundation standard</span></div>
+<div class="row"><span class="g">│     └─ </span><span class="n scope-workspace file">secrets.json</span><span class="note">encrypted · never in git · never in context</span></div>
+<div class="row"><span class="g">└─ </span><span class="n scope-account file">secrets.json</span><span class="note">encrypted · never in git · never in context</span></div>
+</div>
+
+<div class="legend">
+  <span><i class="dot" style="background:var(--account)"></i><b>account</b> — shared by everything</span>
+  <span><i class="dot" style="background:var(--workspace)"></i><b>workspace</b> — a trust boundary</span>
+  <span><i class="dot" style="background:var(--agent)"></i><b>agent</b> — one role</span>
+</div>
+
+<div class="rule">
+  <p><b>Reading down</b> — everything in <code>library/</code> reaches every workspace and agent
+  beneath it, without any of them naming it.</p>
+  <p><b>Reading up</b> is how a run resolves: an agent's own file beats its workspace's, which beats
+  the account's. Nearest wins, at every step.</p>
+  <p><b>Only a workspace holds agents, flows, evals and state</b> — everything that executes, or is
+  produced by executing. The account holds what can be shared; the workspace holds what can run.</p>
+</div>
+</div></body></html>

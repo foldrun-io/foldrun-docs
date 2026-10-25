@@ -1,0 +1,82 @@
+---
+// Every page on the docs site: one shell, one nav, one footer.
+//
+// A near-copy of foldrun-site's Page.astro, and deliberately so: the two sites
+// are separate projects on separate domains, and a shared component would mean
+// a shared build. They are ~70 lines of shell — when one changes, change both,
+// and keep the header and footer looking like one product.
+
+import { signIn, signUp, SITE_URL } from "../lib/site.ts";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Docs need a sidebar and a table of contents beside the prose, which does
+   *  not fit the marketing shell's reading width. Everything else stays at
+   *  the narrower measure, so the site does not drift wide page by page. */
+  wide?: boolean;
+}
+
+const { title, description, wide = false } = Astro.props;
+const shell = wide ? "max-w-7xl" : "max-w-5xl";
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <!-- `summary`, not `summary_large_image`: the layout ships no og:image, and
+         a large-image card with no image renders blank on X/Slack/LinkedIn. -->
+    <meta name="twitter:card" content="summary" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="min-h-full bg-zinc-950 text-zinc-100 antialiased">
+    <div class={`mx-auto ${shell} px-6`}>
+      <header class="flex items-center justify-between py-8">
+        <a href={SITE_URL} class="flex items-center gap-2 font-mono text-lg font-semibold tracking-tight">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+            <path d="M3 11h18" />
+            <circle cx="20.6" cy="19.4" r="3" fill="#09090b" stroke="none" />
+            <circle cx="20.6" cy="19.4" r="1.9" fill="#10b981" stroke="none" />
+          </svg>
+          <span>foldrun<span class="ml-2 text-sm font-normal text-zinc-500">docs</span></span>
+        </a>
+        <nav class="flex items-center gap-6 text-sm text-zinc-400">
+          <a href="/" class="hover:text-zinc-100">Docs</a>
+          <a href={`${SITE_URL}/pricing/`} class="hidden hover:text-zinc-100 sm:inline">Pricing</a>
+          <a href={`${SITE_URL}/blog/`} class="hidden hover:text-zinc-100 sm:inline">Blog</a>
+          <a href={signIn} class="hover:text-zinc-100">Sign in</a>
+          <a
+            href={signUp}
+            class="rounded-md bg-emerald-500 px-3 py-1.5 font-medium text-zinc-950 hover:bg-emerald-400"
+          >
+            Get started
+          </a>
+        </nav>
+      </header>
+
+      <slot />
+
+      <footer
+        class="flex items-center justify-between border-t border-zinc-800 py-8 text-sm text-zinc-500"
+      >
+        <span>2026</span>
+        <span>
+          <a href={SITE_URL} class="hover:text-zinc-300">foldrun.io</a>
+        </span>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "@foldrun/docs-index",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The docs: the markdown, the grouping the dashboard reads, and the site that publishes them at docs.foldrun.io.",
+  "type": "module",
+  "license": "FSL-1.1-ALv2",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "dev": "astro dev --port 4340",
+    "build": "astro build",
+    "preview": "astro preview --port 4340",
+    "check": "astro check",
+    "prepare": "(test ! -f .githooks/install.sh || sh .githooks/install.sh)"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.2.9"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "satteri": "^0.10.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}

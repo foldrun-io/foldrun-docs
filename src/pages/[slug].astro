@@ -1,0 +1,39 @@
+---
+// One doc, rendered from the repo's own docs/*.md.
+//
+// Same files, same words, no second copy to drift — and no server: every doc
+// is a static page, so this is the surface search engines and a first-time
+// reader see without an account existing.
+
+import Docs from "../layouts/Docs.astro";
+import { getCollection, render } from "astro:content";
+import { docTitle, docSummary } from "../lib/docs.ts";
+
+export async function getStaticPaths() {
+  const docs = await getCollection("docs");
+  // Don't build a page for a withheld doc — matches the index/sitemap gate in
+  // the docs index (index.ts) (draft/private: true, or public: false in frontmatter).
+  const shown = docs.filter((entry) => {
+    const d = entry.data as { draft?: boolean; private?: boolean; public?: boolean };
+    return d?.draft !== true && d?.private !== true && d?.public !== false;
+  });
+  return shown.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const raw = entry.body ?? "";
+const title = docTitle(raw, entry.id);
+const summary = docSummary(raw);
+// Astro's own heading list — the outline in the sidebar cannot disagree with
+// the page, because it is not a second parse of the same markdown.
+const { Content, headings } = await render(entry);
+---
+
+<Docs title={`${title} — foldrun docs`} description={summary} slug={entry.id} headings={headings}>
+  <!-- The markdown's own H1 is the page heading. Rendering `title` here too
+       would print it twice; the dashboard strips the H1 instead, which it
+       can do because it renders from the raw string. -->
+  <article class="doc max-w-3xl">
+    <Content />
+  </article>
+</Docs>
