@@ -13,7 +13,8 @@ the feature is off.
 | `FOLDRUN_SECRET_KEY` | the root key that wraps every account's keys. Generate once, keep out of every backup that holds the data |
 | `FOLDRUN_DATA` / `FOLDRUN_DATA_DIR` | the data directory — every workspace, run and user |
 | `FOLDRUN_PUBLIC_URL` | the origin the outside world reaches this install on; needed for approve links and shares |
-| `FOLDRUN_TRUST_PROXY` | `1` behind a proxy, tunnel or load balancer — the rate limiter reads the forwarded address |
+| `FOLDRUN_TRUST_PROXY` | `1` behind a proxy, tunnel or load balancer — the rate limiter reads the forwarded address (`X-Forwarded-For`). `cloudflare` behind Cloudflare — it reads `CF-Connecting-IP`, which Cloudflare writes over whatever the client sent, and never `X-Forwarded-For` |
+| `FOLDRUN_EDGE_SECRET` | required by `FOLDRUN_TRUST_PROXY=cloudflare`: `CF-Connecting-IP` counts only when the request carries `X-Foldrun-Edge` equal to this, which a request header rule in your Cloudflare zone sets at the edge. A Cloudflare address alone proves nothing (anyone's Worker can call your origin and set the header). Unset or empty: no address, and per-IP limits limit no one. The mode reads only the address; links come from `FOLDRUN_PUBLIC_URL`, so set it |
 | `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts. Last switch on |
 | `FOLDRUN_SETUP_TOKEN` | when set, the install's first account (its owner) can be created only with it: `/signup?setup=<token>`. The self-hosting installer writes one to `.env` and prints that link, so another user of the same machine cannot sign up first. Unset, the first signup is free; once any account exists it does nothing |
 | `FOLDRUN_MULTI_TENANT` | `1` on any install that will serve more than one account — refuses to run without step isolation |
