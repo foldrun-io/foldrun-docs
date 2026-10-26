@@ -15,6 +15,7 @@ the feature is off.
 | `FOLDRUN_PUBLIC_URL` | the origin the outside world reaches this install on; needed for approve links and shares |
 | `FOLDRUN_TRUST_PROXY` | `1` behind a proxy, tunnel or load balancer — the rate limiter reads the forwarded address |
 | `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts. Last switch on |
+| `FOLDRUN_SETUP_TOKEN` | when set, the install's first account (its owner) can be created only with it: `/signup?setup=<token>`. The self-hosting installer writes one to `.env` and prints that link, so another user of the same machine cannot sign up first. Unset, the first signup is free; once any account exists it does nothing |
 | `FOLDRUN_MULTI_TENANT` | `1` on any install that will serve more than one account — refuses to run without step isolation |
 | `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or admin console to turn on |
 | `FOLDRUN_VERSION` | the version `/api/healthz` and the dashboard report (default `dev`); set by the image build |
