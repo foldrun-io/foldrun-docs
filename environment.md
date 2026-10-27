@@ -146,6 +146,7 @@ the feature is off.
 | variable | |
 |---|---|
 | `FOLDRUN_METRICS_TOKEN` | the bearer a scraper presents to `/api/metrics` |
+| `FOLDRUN_CSP` | `report-only` sends the dashboard's Content-Security-Policy as `Content-Security-Policy-Report-Only`: violations are reported in the browser, not blocked. Unset: enforced (since 28 Oct 2026). A way back while you find what a page needs, not a setting to leave on |
 | `FOLDRUN_STATUS_ORIGINS` | comma-separated origins allowed to read `/api/status` and `/api/status/history` from a browser. Unset: `https://foldrun.io`, `https://www.foldrun.io`, `https://status.foldrun.io` |
 | `FOLDRUN_STATUS_PAGE_URL` | where the dashboard's **Status** link and `/status` go. Unset: `https://foldrun.io/status/` |
 | `FOLDRUN_STATUS_WEB_URL` | the address the status sampler fetches `/api/healthz` from to judge the dashboard and API. Unset: `FOLDRUN_PUBLIC_URL` — the path a customer takes |
