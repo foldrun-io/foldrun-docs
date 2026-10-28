@@ -155,6 +155,8 @@ the feature is off.
 | `FOLDRUN_SITE_URL` | the public site `security.txt`'s `Policy:` points at. Unset: `https://foldrun.io` |
 | `FOLDRUN_BACKUP_RECIPIENT` | the `age` public key (`age1…`) the database dump taken before a migrating deploy (`foldrun-infra/dev/ci/premigrate-backup.sh`) is encrypted to. Required: unset or invalid, the dump refuses to run and the deploy stops rather than migrate with no way back, and nothing is ever written unencrypted. The private half belongs off the server |
 | `FOLDRUN_RESEND_API_KEY` | the platform's own Resend key — run notifications, invites and the low-balance warning go out through it |
+| `FOLDRUN_PLATFORM_INVITES_PER_DAY` | how many invite recipients one account may send to per day on the platform's key. Default 25 |
+| `FOLDRUN_PLATFORM_MAIL_PER_DAY` | the same cap for the rest of an account's mail on the platform's key (`notify:`, approvals, low balance). Default 200. Sign-in, billing and account notices are never capped; at most 10 recipients per message |
 | `FOLDRUN_EMAIL_FROM` | who that platform mail says it is from (default `foldrun <hello@foldrun.io>`) |
 | `FOLDRUN_OIDC_ISSUER` | turns on keyless cloud identity: this install's public https address (no port, query or fragment), the `iss` of every identity token and where `/.well-known/openid-configuration` and `/.well-known/jwks.json` are read. Unset: the feature is off. Rotate the signing key with `node --experimental-strip-types foldrun-platform/scripts/rotate-oidc-key.ts` where the platform runs |
 | `FOLDRUN_IDENTITY_LIVENESS_MS` | how recently a step's driver must have checked in for the egress proxy to issue it an identity token (default 15 minutes: the claim heartbeat plus one late beat) |
