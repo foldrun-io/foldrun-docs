@@ -11,6 +11,9 @@ the feature is off.
 | variable | |
 |---|---|
 | `FOLDRUN_SECRET_KEY` | the root key that wraps every account's keys. Generate once, keep out of every backup that holds the data |
+| `FOLDRUN_VAULT_WRITE_BOUND` | `1`: secrets are sealed for their place — the account, the scope (account or workspace), the name, its kind and the sites it is bound to — so a stored value moved to another name, scope or account, or with its sites rewritten, no longer opens (it reads as not set). Account keys are wrapped bound to their account, and a two-step secret to its person (re-sealed at that person's next sign-in). At boot, every older record is sealed the same way, file by file. Set it once every pod runs a release that reads bound records (all since 29 Oct 2026) |
+| `FOLDRUN_VAULT_REQUIRE_BOUND` | `1`: an unbound (older) secret record reads as not set. Set after the boot log shows nothing left unbound |
+| `FOLDRUN_INSTALL_KEY_ABSENT` | `1` on a process that must never hold the install key (an egress pod): asking for it throws instead of creating `.secret-key` on the data volume |
 | `FOLDRUN_DATA` / `FOLDRUN_DATA_DIR` | the data directory — every workspace, run and user |
 | `FOLDRUN_PUBLIC_URL` | the origin the outside world reaches this install on; needed for approve links and shares |
 | `FOLDRUN_TRUST_PROXY` | `1` behind a proxy, tunnel or load balancer — the rate limiter reads the forwarded address (`X-Forwarded-For`). `cloudflare` behind Cloudflare — it reads `CF-Connecting-IP`, which Cloudflare writes over whatever the client sent, and never `X-Forwarded-For` |
