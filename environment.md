@@ -6,6 +6,71 @@ they are documented because the behaviour they switch is yours to know.
 Unset means the default in the right-hand column; a blank default means
 the feature is off.
 
+## Operator settings
+
+Since 30 Oct 2026 the variables below are **operator settings**: values the
+platform reads from its own database table (`platform_settings`) first,
+and from the variable only when no row says. Precedence, per key: the row,
+else the variable, else the default in the third column. With no rows an
+install behaves exactly as its environment says, so a self-hosted install
+can keep setting these as variables — nothing changes for it.
+
+On foldrun's hosted platform they are changed in the operator console
+(admin.foldrun.io → Settings), never by a deploy: every pod picks a change
+up within ten seconds, each change is audited by the operator who made it,
+and a run is charged at the prices it started under (its run-start price
+snapshot), never at a price changed while it ran. The variables stay read
+as the fallback for at least one release after a deployment stops setting
+them, so a rollback still has its values.
+
+What is still environment — addresses, credentials, identity, pod and node
+sizes, and the security switches (`FOLDRUN_MULTI_TENANT`,
+`FOLDRUN_NETWORK_ENFORCE`, the vault and egress switches) — is never a
+setting and never editable from a web page.
+
+| setting | variable (fallback) | default | |
+|---|---|---|---|
+| `signup.open` | `FOLDRUN_OPEN_SIGNUP` | `false` | Strangers may create accounts. Off: invite-only once the first account exists. Owners only. Asks for a reason when turned on. |
+| `plan.concurrency` | `FOLDRUN_PLAN_CONCURRENCY` | unset | Runs one account drives at once when its plan says nothing. 0: no cap. |
+| `plan.workspaces` | `FOLDRUN_PLAN_WORKSPACES` | unset | Workspaces an account may create when its plan says nothing. 0: no cap. |
+| `account.concurrency` | `FOLDRUN_ACCOUNT_CONCURRENCY` | unset | Runs one account may have in flight across every worker, unless its plan gives more. 0: no cap. |
+| `account.pods` | `FOLDRUN_ACCOUNT_PODS` | unset | Sandboxes one account may have running at once; a fan-out takes turns. 0: no cap. |
+| `account.vcpu` | `FOLDRUN_ACCOUNT_VCPU` | unset | Cores one account's running steps may hold together (no plan). 0: no cap. |
+| `account.memory_gib` | `FOLDRUN_ACCOUNT_MEMORY_GIB` | unset | GiB one account's running steps may hold together (no plan). 0: no cap. |
+| `account.disk_gib` | `FOLDRUN_ACCOUNT_DISK_GIB` | unset | GiB of disk one account's running steps may be allowed together (no plan). 0: no cap. |
+| `step.max_vcpu` | `FOLDRUN_STEP_MAX_VCPU` | unset | A step asking for more fails at once (no plan). 0: no cap beyond the pool. |
+| `step.max_memory_gib` | `FOLDRUN_STEP_MAX_MEMORY_GIB` | unset | A step asking for more fails at once (no plan). 0: no cap beyond the pool. |
+| `step.max_disk_gib` | `FOLDRUN_STEP_MAX_DISK_GIB` | unset | A step asking for more fails at once (no plan). 0: no cap beyond the pool. |
+| `room.run_memory_gib` | `FOLDRUN_RUN_MEMORY_GIB` | unset | Memory the run namespace may reserve; a step waits for room past it. 0: no limit. Never on an autoscaled cluster. Owners only. |
+| `room.run_disk_gib` | `FOLDRUN_RUN_DISK_GIB` | unset | Disk the run namespace's pods may be allowed together; a step waits past it. 0: no limit. Never on an autoscaled cluster. Owners only. |
+| `pods.search_max` | `FOLDRUN_SEARCH_MAX_PODS` | `3` | The most search pods one account's pool grows to. |
+| `pods.browser_max` | `FOLDRUN_BROWSER_MAX_PODS` | `4` | The most browser pods one account's pool grows to. |
+| `assistant.account_cap` | `FOLDRUN_ASSISTANT_ACCOUNT_CAP` | `3` | Assistant replies of one account running at once across every assistant pod. |
+| `grade.account_limit` | `FOLDRUN_GRADE_ACCOUNT_LIMIT` | `4` | Runs a grader eval grades for one account in one pass. |
+| `runner.cpus` | `FOLDRUN_RUNNER_CPUS` | `2` | A default-size step's cores: its limit and its billing weight. Owners only. |
+| `runner.memory` | `FOLDRUN_RUNNER_MEMORY` | `2g` | A default-size step's memory, e.g. 6Gi: a hard ceiling and a billing weight. Owners only. |
+| `runner.cpus_small` | `FOLDRUN_RUNNER_CPUS_SMALL` | `1` | size: small — cores. Owners only. |
+| `runner.memory_small` | `FOLDRUN_RUNNER_MEMORY_SMALL` | `1Gi` | size: small — memory, e.g. 1Gi. Owners only. |
+| `runner.cpus_heavy` | `FOLDRUN_RUNNER_CPUS_HEAVY` | `4` | size: heavy — cores. Owners only. |
+| `runner.memory_heavy` | `FOLDRUN_RUNNER_MEMORY_HEAVY` | `8Gi` | size: heavy — memory, e.g. 8Gi. Owners only. |
+| `runs.retention_days` | `FOLDRUN_RETENTION_DAYS` | unset | Finished runs older than this are pruned by the hourly pass. 0: kept for ever. Owners only. Asks for a reason when lowered. |
+| `webhooks.disable_days` | `FOLDRUN_WEBHOOK_DISABLE_DAYS` | `3` | A notify: webhook failing every delivery this long is switched off. |
+| `mail.from` | `FOLDRUN_EMAIL_FROM` | `foldrun <hello@foldrun.io>` | The From of the platform's own mail. Its domain must be verified at the mail provider, or every send is refused. Owners only. Asks for a reason. |
+| `mail.invites_per_day` | `FOLDRUN_PLATFORM_INVITES_PER_DAY` | `25` | Recipients one account may invite per day on the platform's mail key. |
+| `mail.per_day` | `FOLDRUN_PLATFORM_MAIL_PER_DAY` | `200` | Recipients of notify:, approvals and the like, per account per day, on the platform's mail key. |
+| `schedule.spread_sec` | `FOLDRUN_SCHEDULE_SPREAD_SEC` | `0` | Scheduled runs start up to this many seconds after their minute, the same offset per flow every day. 0: on the minute. |
+| `billing.max_run_exposure` | `FOLDRUN_MAX_RUN_EXPOSURE` | unset | What admission holds of the balance for each unsettled run. 0: the flow's own history decides. Owners only. |
+
+The hosted build adds its own (prices, billing, the Stripe catalogue —
+`FOLDRUN_MARGIN`, `FOLDRUN_BILLING`, `STRIPE_PRICE_*` and the rest); an
+install built from the public repositories has none of them.
+
+`FOLDRUN_PLATFORM_KEY_ACCOUNTS` is not a setting but, on the hosted
+platform, a per-account lever: an account may use the platform's own model
+credential only when the operator granted it (fail-closed). The variable's
+names count for one release more, and unset or `*` means nobody there. A
+self-hosted install reads the variable as before.
+
 ## Core
 
 | variable | |
@@ -18,7 +83,7 @@ the feature is off.
 | `FOLDRUN_PUBLIC_URL` | the origin the outside world reaches this install on; needed for approve links and shares |
 | `FOLDRUN_TRUST_PROXY` | `1` behind a proxy, tunnel or load balancer — the rate limiter reads the forwarded address (`X-Forwarded-For`). `cloudflare` behind Cloudflare — it reads `CF-Connecting-IP`, which Cloudflare writes over whatever the client sent, and never `X-Forwarded-For` |
 | `FOLDRUN_EDGE_SECRET` | required by `FOLDRUN_TRUST_PROXY=cloudflare`: `CF-Connecting-IP` counts only when the request carries `X-Foldrun-Edge` equal to this, which a request header rule in your Cloudflare zone sets at the edge. A Cloudflare address alone proves nothing (anyone's Worker can call your origin and set the header). Unset or empty: no address, and per-IP limits limit no one. The mode reads only the address; links come from `FOLDRUN_PUBLIC_URL`, so set it |
-| `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts. Last switch on |
+| `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts. Last switch on. An [operator setting](#operator-settings) (`signup.open`) |
 | `FOLDRUN_SETUP_TOKEN` | when set, the install's first account (its owner) can be created only with it: `/signup?setup=<token>`. The self-hosting installer writes one to `.env` and prints that link, so another user of the same machine cannot sign up first. Unset, the first signup is free; once any account exists it does nothing |
 | `FOLDRUN_MULTI_TENANT` | `1` on any install that will serve more than one account — refuses to run without step isolation |
 | `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or admin console to turn on |
@@ -64,7 +129,7 @@ the feature is off.
 | `FOLDRUN_RUNNER_CPU_REQUEST`, `…_CPU_REQUEST_SMALL`, `…_CPU_REQUEST_HEAVY` | the CPU a run pod reserves on the node (k8s `requests.cpu`): 250m, 100m, 500m by default. This decides how pods pack onto a node and each pod's share when every core is busy. It is never above the class's cores; a request tuned higher is lowered to the limit |
 | `FOLDRUN_RUNNER_DISK`, `…_DISK_SMALL`, `…_DISK_HEAVY` | node disk a step may write (k8s `ephemeral-storage` limit): 8Gi, 2Gi, 20Gi by default — the workspace copy, outputs, /tmp; a step over it is evicted rather than the node filling |
 | `FOLDRUN_SHUTDOWN_GRACE_MS` | how long a stopping worker waits for in-flight steps before releasing its lease and exiting, default 25000 — keep under the pod's termination grace |
-| `FOLDRUN_PLATFORM_KEY_ACCOUNTS` | the accounts allowed to run on the platform's own model credential (`ANTHROPIC_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`, the key file), comma-separated — the operator's own. Every other account brings an API key (Settings → Model, `foldrun account model set`), and a step without one is refused before it starts; a Claude login token is refused as such an account's key. Unset or `*`: every account, as before — right for a laptop or a single-owner install. Set on worker and web alike |
+| `FOLDRUN_PLATFORM_KEY_ACCOUNTS` | the accounts allowed to run on the platform's own model credential (`ANTHROPIC_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`, the key file), comma-separated — the operator's own. Every other account brings an API key (Settings → Model, `foldrun account model set`), and a step without one is refused before it starts; a Claude login token is refused as such an account's key. Unset or `*`: every account, as before — right for a laptop or a single-owner install. Set on worker and web alike. On the hosted platform it is fail-closed and decided per account ([operator settings](#operator-settings)) |
 | `FOLDRUN_EGRESS_URL` | where a step reaches the worker's egress proxy (`http://foldrun-egress.foldrun.svc.cluster.local:8090` on the cluster; `http://host.docker.internal:8090` on a compose install, the default there). Set, and a step's http tools and model calls send `${NAME}` placeholders that the worker fills at the boundary — the credential never enters the sandbox. Unset, and steps materialise secrets into the sandbox as before |
 | `FOLDRUN_EGRESS_PORT` | the port the proxy listens on, default 8090 |
 | `FOLDRUN_NETWORK_ENFORCE` | `1` makes the egress proxy refuse a site off a step's [`network:`](network) list, and on a cluster labels the step's pod so its network policy gives it the proxy and DNS but not the world. Unset, the proxy only reports: a site off the list is allowed and named in the trace once per step, so an install learns which sites its agents use before anything is refused. An account or workspace can refuse sooner with `network_enforce: true` in its `AGENTS.md`; this switch only adds to that. Read when the proxy grants each step's lease |
