@@ -9,8 +9,9 @@
 //   README.md         the docs repo's own readme
 //   LICENSING.md      the repo's licence summary (each package ships its own)
 //   environment.md    the platform's server environment variables
-// and inside api.md, the "Super admin" and "Operations" sections, which are
-// the platform operator's routes, not an account's.
+// and inside api.md, the "Operations" section: the platform's own routes
+// (health, metrics), not an account's. The operator console's routes are
+// not in the public docs at all (foldrun-admin/docs/console.md).
 //
 // Plain JavaScript so a Node script can import it without a build.
 
@@ -18,7 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const SKIP = new Set(["README.md", "LICENSING.md", "environment.md"]);
-export const DROP_SECTIONS = { "api.md": ["Super admin", "Operations"] };
+export const DROP_SECTIONS = { "api.md": ["Operations"] };
 
 export function dropSections(text, titles) {
   const lines = text.split("\n");

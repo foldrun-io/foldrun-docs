@@ -86,7 +86,7 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts. Last switch on. An [operator setting](#operator-settings) (`signup.open`) |
 | `FOLDRUN_SETUP_TOKEN` | when set, the install's first account (its owner) can be created only with it: `/signup?setup=<token>`. The self-hosting installer writes one to `.env` and prints that link, so another user of the same machine cannot sign up first. Unset, the first signup is free; once any account exists it does nothing |
 | `FOLDRUN_MULTI_TENANT` | `1` on any install that will serve more than one account — refuses to run without step isolation |
-| `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or admin console to turn on |
+| `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or operator console to turn on |
 | `FOLDRUN_VERSION` | the version `/api/healthz` and the dashboard report (default `dev`); set by the image build |
 | `FOLDRUN_ACCOUNT` | the account folder, for a program that embeds foldrun and knows where its account is. Beats the usual search upward from the working directory |
 
