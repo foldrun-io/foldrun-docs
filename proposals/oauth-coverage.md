@@ -39,8 +39,8 @@ something different in each:
 | Resource indicators, RFC 8707 | ⚠️ via `extra` | ✅ enforced |
 | Dynamic registration / CIMD (§5.12) | n/a (foldrun registers by hand) | ✅ both |
 | PAR, RFC 9126 (§5.12) | ✅ used whenever the app has a `par_url` (built with B, ahead of part H) | later |
-| DPoP, RFC 9449 (§5.11) | ❌ — **part H** (Bluesky/atproto, Okta DPoP) | later |
-| mTLS client auth + bound tokens, RFC 8705 (§5.11) | ⚠️ `client-cert` exists, never used at the token endpoint — **part H** | later |
+| DPoP, RFC 9449 (§5.11) | ✅ (part H) | later |
+| mTLS client auth + bound tokens, RFC 8705 (§5.11) | ✅ `tls_client_auth` (part H) | later |
 | RAR `authorization_details` (§5.12) | ✅ through `--authorize-param` (a JSON value) | — |
 | CIBA (§5.12) | not planned (no provider an agent needs uses it) | — |
 | OIDC sign-in, SAML, SCIM (Modules 6–7) | — | — (the sign-in role: **part J**) |
@@ -217,6 +217,6 @@ ignored.
 | E. `private_key_jwt` | done 1 Nov 2026 — client (paste or generate a key, Entra cert thumbprints) and MCP server (`jwks`/`jwks_uri`, jti once); proven against Keycloak | this commit set |
 | F. Device flow | done 1 Nov 2026 — Connect with a code (dashboard), `foldrun connect --device` (platform or local), PKCE on the device grant; proven against Keycloak | this commit set |
 | G. MCP client credentials | done 1 Nov 2026 — machine clients (secret or private_key_jwt) with a standing grant capped by their admin | this commit set |
-| H. DPoP, PAR, mTLS | planned | |
+| H. DPoP, PAR, mTLS | done 1 Nov 2026 — DPoP (own key per connection, proofs on refresh and through the egress proxy, nonces), mTLS (`tls_client_auth`, bound tokens), PAR (with B); proven against Keycloak. Not done: the atproto (Bluesky) real-world check — needs a Bluesky account and a hosted client metadata document | this commit set |
 | I. Token Exchange | planned | |
 | J. SSO for people | needs its own proposal | |
