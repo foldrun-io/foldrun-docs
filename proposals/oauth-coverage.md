@@ -26,7 +26,7 @@ something different in each:
 | Authorization Code + PKCE S256 (§5.5) | ✅ `foldrun connect` | ✅ |
 | Refresh, rotation (§5.8) | ✅ (a rotated refresh token is stored) | ✅ rotation + reuse revokes the grant |
 | Client Credentials (§5.6) | ✅ `grant_type: client_credentials` | ❌ — **part G** |
-| Device Authorization (§5.7) | ❌ — **part F** | not needed (the CLI has `foldrun login`) |
+| Device Authorization (§5.7) | ✅ (part F) | not needed (the CLI has `foldrun login`) |
 | JWT Bearer grant, RFC 7523 (§5.12) | ✅ `service-account` | — |
 | Token Exchange, RFC 8693 (§5.12) | ⚠️ cloud STS only, via `identity` — **part I** | — |
 | Client auth `client_secret_post` | ✅ (the only way it sends a secret) | ✅ |
@@ -215,7 +215,7 @@ ignored.
 | C. Revocation | done 1 Nov 2026 — delete/reconnect revoke at the provider; `POST /api/mcp/oauth/revoke` | this commit set |
 | D. Capability list + Keycloak + fixtures | done 1 Nov 2026 — core `oauth-capabilities.ts` → `oauth.md`; `e2e-oauth-keycloak` (Keycloak 26.8.1, gates staging promotion via infra `oauth-conformance.yml`); provider fixtures; MCP SDK test in web | this commit set |
 | E. `private_key_jwt` | done 1 Nov 2026 — client (paste or generate a key, Entra cert thumbprints) and MCP server (`jwks`/`jwks_uri`, jti once); proven against Keycloak | this commit set |
-| F. Device flow | planned | |
+| F. Device flow | done 1 Nov 2026 — Connect with a code (dashboard), `foldrun connect --device` (platform or local), PKCE on the device grant; proven against Keycloak | this commit set |
 | G. MCP client credentials | planned | |
 | H. DPoP, PAR, mTLS | planned | |
 | I. Token Exchange | planned | |
