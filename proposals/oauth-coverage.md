@@ -213,7 +213,7 @@ ignored.
 | A. Basic + token responses | done 1 Nov 2026 — `token_auth` on oauth2 secrets and saved apps; the agent-facing use of kept `fields` (instance_url) is not built | core cd1bd52, platform bfed11d, web f35c999, CLI + docs (this commit) |
 | B. Discovery + `iss` | done 1 Nov 2026 — `--issuer` / Discover, `POST /api/oauth/discover`, `iss_parameter` | this commit set |
 | C. Revocation | done 1 Nov 2026 — delete/reconnect revoke at the provider; `POST /api/mcp/oauth/revoke` | this commit set |
-| D. Capability list + Keycloak + fixtures | planned | |
+| D. Capability list + Keycloak + fixtures | done 1 Nov 2026 — core `oauth-capabilities.ts` → `oauth.md`; `e2e-oauth-keycloak` (Keycloak 26.8.1, gates staging promotion via infra `oauth-conformance.yml`); provider fixtures; MCP SDK test in web | this commit set |
 | E. `private_key_jwt` | planned | |
 | F. Device flow | planned | |
 | G. MCP client credentials | planned | |

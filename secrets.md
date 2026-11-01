@@ -290,6 +290,9 @@ How a connection is kept safe, whatever the provider:
 - A provider that **rotates refresh tokens** sends a new one with each
   refresh; it replaces the old one in the vault, where that secret is kept.
 
+Every kind of OAuth, and what foldrun does about each, is listed in
+[OAuth support](oauth).
+
 ### Discovery from an issuer
 
 Most providers publish their own OAuth metadata. Type the provider's
