@@ -1,6 +1,6 @@
 # People signing in with SSO: OIDC, then SAML, then SCIM
 
-*Proposal, 2026-11-01. Status: planned, nothing built. Part J of
+*Proposal, 2026-11-01. Status: **on hold** (owner, 1 Nov 2026) — nothing built. Part J of
 [oauth-coverage](oauth-coverage.md), which says to write this before building.
 One part per session, in order. Each part ships through every layer (API →
 dashboard → CLI → docs → tests → Codex review → commit and push, suites on the
