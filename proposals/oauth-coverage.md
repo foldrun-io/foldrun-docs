@@ -30,7 +30,7 @@ something different in each:
 | JWT Bearer grant, RFC 7523 (§5.12) | ✅ `service-account` | — |
 | Token Exchange, RFC 8693 (§5.12) | ⚠️ cloud STS only, via `identity` — **part I** | — |
 | Client auth `client_secret_post` | ✅ (the only way it sends a secret) | ✅ |
-| Client auth `client_secret_basic` (§4.2) | ❌ — **part A** (Notion, Spotify, Reddit, Zoom require it) | ✅ |
+| Client auth `client_secret_basic` (§4.2) | ✅ `token_auth: client_secret_basic` (part A) | ✅ |
 | Client auth `private_key_jwt` (§4.4) | ❌ — **part E** (Entra certificates, Okta, FAPI) | ❌ — **part E** |
 | Public client, PKCE only | ✅ | ✅ |
 | Metadata discovery, RFC 8414 / OIDC (§5.10, §6.6) | ❌ URLs typed by hand — **part B** | ✅ serves it |
@@ -210,7 +210,7 @@ ignored.
 
 | Part | Status | Shipped in |
 |---|---|---|
-| A. Basic + token responses | planned | |
+| A. Basic + token responses | done 1 Nov 2026 — `token_auth` on oauth2 secrets and saved apps; the agent-facing use of kept `fields` (instance_url) is not built | core cd1bd52, platform bfed11d, web f35c999, CLI + docs (this commit) |
 | B. Discovery + `iss` | planned | |
 | C. Revocation | planned | |
 | D. Capability list + Keycloak + fixtures | planned | |
