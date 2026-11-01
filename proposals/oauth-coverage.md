@@ -33,12 +33,12 @@ something different in each:
 | Client auth `client_secret_basic` (§4.2) | ✅ `token_auth: client_secret_basic` (part A) | ✅ |
 | Client auth `private_key_jwt` (§4.4) | ❌ — **part E** (Entra certificates, Okta, FAPI) | ❌ — **part E** |
 | Public client, PKCE only | ✅ | ✅ |
-| Metadata discovery, RFC 8414 / OIDC (§5.10, §6.6) | ❌ URLs typed by hand — **part B** | ✅ serves it |
-| Issuer in the redirect, RFC 9207 (mix-up defence) | ❌ — **part B** | ✅ sends `iss` |
-| Revocation, RFC 7009 (§5.10) | ❌ a disconnect leaves the provider's token live — **part C** | ❌ no `/revoke` — **part C** |
+| Metadata discovery, RFC 8414 / OIDC (§5.10, §6.6) | ✅ `--issuer`, Discover (part B) | ✅ serves it |
+| Issuer in the redirect, RFC 9207 (mix-up defence) | ✅ checked against the issuer (part B) | ✅ sends `iss` |
+| Revocation, RFC 7009 (§5.10) | ✅ on delete and reconnect (part C) | ✅ `/api/mcp/oauth/revoke` (part C) |
 | Resource indicators, RFC 8707 | ⚠️ via `extra` | ✅ enforced |
 | Dynamic registration / CIMD (§5.12) | n/a (foldrun registers by hand) | ✅ both |
-| PAR, RFC 9126 (§5.12) | ❌ — **part H** (atproto, FAPI) | later |
+| PAR, RFC 9126 (§5.12) | ✅ used whenever the app has a `par_url` (built with B, ahead of part H) | later |
 | DPoP, RFC 9449 (§5.11) | ❌ — **part H** (Bluesky/atproto, Okta DPoP) | later |
 | mTLS client auth + bound tokens, RFC 8705 (§5.11) | ⚠️ `client-cert` exists, never used at the token endpoint — **part H** | later |
 | RAR `authorization_details` (§5.12) | ✅ through `--authorize-param` (a JSON value) | — |
@@ -211,8 +211,8 @@ ignored.
 | Part | Status | Shipped in |
 |---|---|---|
 | A. Basic + token responses | done 1 Nov 2026 — `token_auth` on oauth2 secrets and saved apps; the agent-facing use of kept `fields` (instance_url) is not built | core cd1bd52, platform bfed11d, web f35c999, CLI + docs (this commit) |
-| B. Discovery + `iss` | planned | |
-| C. Revocation | planned | |
+| B. Discovery + `iss` | done 1 Nov 2026 — `--issuer` / Discover, `POST /api/oauth/discover`, `iss_parameter` | this commit set |
+| C. Revocation | done 1 Nov 2026 — delete/reconnect revoke at the provider; `POST /api/mcp/oauth/revoke` | this commit set |
 | D. Capability list + Keycloak + fixtures | planned | |
 | E. `private_key_jwt` | planned | |
 | F. Device flow | planned | |
