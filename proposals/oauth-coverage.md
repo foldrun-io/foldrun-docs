@@ -31,7 +31,7 @@ something different in each:
 | Token Exchange, RFC 8693 (§5.12) | ⚠️ cloud STS only, via `identity` — **part I** | — |
 | Client auth `client_secret_post` | ✅ (the only way it sends a secret) | ✅ |
 | Client auth `client_secret_basic` (§4.2) | ✅ `token_auth: client_secret_basic` (part A) | ✅ |
-| Client auth `private_key_jwt` (§4.4) | ❌ — **part E** (Entra certificates, Okta, FAPI) | ❌ — **part E** |
+| Client auth `private_key_jwt` (§4.4) | ✅ (part E) | ✅ (part E) |
 | Public client, PKCE only | ✅ | ✅ |
 | Metadata discovery, RFC 8414 / OIDC (§5.10, §6.6) | ✅ `--issuer`, Discover (part B) | ✅ serves it |
 | Issuer in the redirect, RFC 9207 (mix-up defence) | ✅ checked against the issuer (part B) | ✅ sends `iss` |
@@ -214,7 +214,7 @@ ignored.
 | B. Discovery + `iss` | done 1 Nov 2026 — `--issuer` / Discover, `POST /api/oauth/discover`, `iss_parameter` | this commit set |
 | C. Revocation | done 1 Nov 2026 — delete/reconnect revoke at the provider; `POST /api/mcp/oauth/revoke` | this commit set |
 | D. Capability list + Keycloak + fixtures | done 1 Nov 2026 — core `oauth-capabilities.ts` → `oauth.md`; `e2e-oauth-keycloak` (Keycloak 26.8.1, gates staging promotion via infra `oauth-conformance.yml`); provider fixtures; MCP SDK test in web | this commit set |
-| E. `private_key_jwt` | planned | |
+| E. `private_key_jwt` | done 1 Nov 2026 — client (paste or generate a key, Entra cert thumbprints) and MCP server (`jwks`/`jwks_uri`, jti once); proven against Keycloak | this commit set |
 | F. Device flow | planned | |
 | G. MCP client credentials | planned | |
 | H. DPoP, PAR, mTLS | planned | |

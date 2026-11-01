@@ -36,7 +36,7 @@ authorization server (Keycloak) and against recorded provider answers.
 | Token responses as providers send them | RFC 6749 §5.1 | Supported | JSON or form-encoded, `expires_in` as a string, Slack's `authed_user`. |
 | JWT bearer grant (service accounts) | RFC 7523 §2.1 | Supported | The service-account connection (`--kind service-account`). |
 | Rich authorization requests | RFC 9396 | Supported | `authorization_details` as an extra authorize parameter (a JSON value). |
-| Signed client assertion (private_key_jwt) | RFC 7523 §2.2 | Planned | Part E: Entra certificates, Okta, FAPI. |
+| Signed client assertion (private_key_jwt) | RFC 7523 §2.2 | Supported | `token_auth: private_key_jwt` with a key you paste or foldrun makes; a certificate adds Entra's thumbprint. `--token-auth jwt`. |
 | Device authorization | RFC 8628 | Planned | Part F: `foldrun connect --device`. |
 | Token exchange | RFC 8693 | Planned | Part I: a `token-exchange` secret kind. Cloud STS is covered today by the keyless identity kind. |
 | DPoP sender-constrained tokens | RFC 9449 | Planned | Part H: Bluesky/atproto, Okta DPoP. |
@@ -56,7 +56,7 @@ authorization server (Keycloak) and against recorded provider answers.
 | Issuer in the authorization response | RFC 9207 | Supported | Every answer carries `iss`. |
 | Revocation endpoint | RFC 7009 | Supported | `POST /api/mcp/oauth/revoke`: an app ends its own connection. |
 | Client credentials for machine clients | RFC 6749 §4.4 | Planned | Part G: machine MCP clients an admin registers. |
-| Signed client assertion (private_key_jwt) | RFC 7523 §2.2 | Planned | Part E: apps that declare `jwks` or `jwks_uri`. |
+| Signed client assertion (private_key_jwt) | RFC 7523 §2.2 | Supported | Apps that register `jwks` or `jwks_uri` sign in with assertions; each `jti` is used once. |
 
 ## Refused on purpose
 
