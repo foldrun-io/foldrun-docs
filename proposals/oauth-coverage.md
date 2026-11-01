@@ -28,7 +28,7 @@ something different in each:
 | Client Credentials (§5.6) | ✅ `grant_type: client_credentials` | ✅ machine clients (part G) |
 | Device Authorization (§5.7) | ✅ (part F) | not needed (the CLI has `foldrun login`) |
 | JWT Bearer grant, RFC 7523 (§5.12) | ✅ `service-account` | — |
-| Token Exchange, RFC 8693 (§5.12) | ⚠️ cloud STS only, via `identity` — **part I** | — |
+| Token Exchange, RFC 8693 (§5.12) | ✅ `token-exchange` kind (part I) | — |
 | Client auth `client_secret_post` | ✅ (the only way it sends a secret) | ✅ |
 | Client auth `client_secret_basic` (§4.2) | ✅ `token_auth: client_secret_basic` (part A) | ✅ |
 | Client auth `private_key_jwt` (§4.4) | ✅ (part E) | ✅ (part E) |
@@ -218,5 +218,5 @@ ignored.
 | F. Device flow | done 1 Nov 2026 — Connect with a code (dashboard), `foldrun connect --device` (platform or local), PKCE on the device grant; proven against Keycloak | this commit set |
 | G. MCP client credentials | done 1 Nov 2026 — machine clients (secret or private_key_jwt) with a standing grant capped by their admin | this commit set |
 | H. DPoP, PAR, mTLS | done 1 Nov 2026 — DPoP (own key per connection, proofs on refresh and through the egress proxy, nonces), mTLS (`tls_client_auth`, bound tokens), PAR (with B); proven against Keycloak. Not done: the atproto (Bluesky) real-world check — needs a Bluesky account and a hosted client metadata document | this commit set |
-| I. Token Exchange | planned | |
-| J. SSO for people | needs its own proposal | |
+| I. Token Exchange | done 1 Nov 2026 — `token-exchange` secret kind, subject from another secret; proven against Keycloak. Not done: the workload identity as subject (identity tokens are minted for a sandboxed step, not on the host) | this commit set |
+| J. SSO for people | its proposal written: [sso.md](sso.md) (1 Nov 2026) | |
