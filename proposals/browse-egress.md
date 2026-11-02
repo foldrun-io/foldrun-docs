@@ -1,6 +1,6 @@
 # Every browser under the step's `network:` rule
 
-*Proposal, 2026-11-02. Status: **for the owner's decision**. From Linear FOL-110
+*Proposal, 2026-11-02. Status: **approved** (owner, 2 Nov 2026: "do the recommendation" — all four decisions as recommended). From Linear FOL-110
 (Kousha, e2e on dev). Researched against vendor docs and browser source on
 2 Nov 2026 and debated with Codex over three rounds (findings verified against
 the code). Each phase ships through every layer (API → dashboard → CLI → docs →
@@ -106,19 +106,22 @@ inside a CONNECT tunnel (the destination is checked; MITM sites see each request
    sites; MITM WebSocket upgrades; tunnels closed when a lease ends.
 4. **Vendors:** the public proxy door, then each provider qualified on its own.
 
-## For the owner to decide
+## Decided (owner, 2 Nov 2026)
 
-1. The browse-service shape (execution leaves the sandbox) — recommended.
-2. One browser pod per active lease at first (more pods, true isolation).
-3. A public, authenticated door on the egress proxy (new internet-facing surface).
-4. Bright Data / ZenRows / raw CDP: refused under a restricted enforced
-   `network:`, opt-in per agent as *not enforced* otherwise.
+1. The browse-service shape: execution leaves the sandbox. Yes.
+2. One browser pod per active lease at first. Yes.
+3. A public, authenticated door on the egress proxy for vendor browsers. Yes.
+4. Bright Data / ZenRows / raw CDP: refused under a restricted, enforced
+   `network:`; otherwise opt-in per agent as *not enforced*. Yes.
+
+No new container image: the browse service and per-lease browser pods run on
+the full runner image, as the browser pod does today.
 
 ## Status
 
 | Phase | Status | Shipped in |
 |---|---|---|
-| 1. Labels and admission | planned | |
+| 1. Labels and admission | built; live check on dev pending | core, web, cli, docs (2 Nov) |
 | 2. Browse service | planned | |
 | 3. Hosted enforcement | planned | |
 | 4. Vendors | planned | |
