@@ -48,12 +48,10 @@ Private repos' `.circleci/config.yml` is generated from one template
 GitHub access is the **foldrun-bot GitHub App**, not a person's token
 (3 Nov 2026). Each step mints an installation token (`contents: write`, one
 hour, `dev/ci/gh-app-token.sh`), and git asks for it through a credential
-helper, so no token sits in a remote URL. The org token is left in
-`foldrun-dev` alone, for the two things the App cannot do: push to GHCR (no
-packages permission) and, as a fallback, create a tag over changed workflow
-files (no workflows permission; `push_ref`, `release.sh`, `tag-components.sh`).
-Narrowing it further — a packages-only token, or packages and workflows
-permission on the App — is a GitHub web-UI change.
+helper, so no token sits in a remote URL. The token carries `contents` and
+`workflows: write` (a tag over changed workflow files needs the latter). The
+one thing the App cannot do is push to GHCR, which takes no App token: that
+login alone uses `FOLDRUN_GHCR_TOKEN` in `foldrun-dev`.
 AWS is OIDC (no keys); images are signed keyless (CircleCI OIDC).
 Fork pull requests to public repos run with no
 secrets.
