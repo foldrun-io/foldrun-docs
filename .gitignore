@@ -2,3 +2,6 @@
 node_modules/
 dist/
 .astro/
+
+# SBOMs the security gate writes (.githooks/security.sh); CI keeps them as artifacts
+sbom/
