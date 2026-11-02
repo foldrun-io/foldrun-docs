@@ -121,7 +121,7 @@ the full runner image, as the browser pod does today.
 
 | Phase | Status | Shipped in |
 |---|---|---|
-| 1. Labels and admission | built; live check on dev pending | core, web, cli, docs (2 Nov) |
+| 1. Labels and admission | deployed on dev (v2026.11.02.2, 2 Nov); not yet clicked through — dev moved to AWS and has no account with an agent yet | core d684047, web 6f7f5fe, cli b215e07, docs 0ca9f0e |
 | 2. Browse service | planned | |
 | 3. Hosted enforcement | planned | |
 | 4. Vendors | planned | |
