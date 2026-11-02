@@ -42,10 +42,20 @@ code only, and FSL-1.1 is not.
 
 Private repos' `.circleci/config.yml` is generated from one template
 (`dev/ci/repo-ci/circleci.yml.tmpl`). Secrets live in two CircleCI contexts:
-`foldrun-dev` (the deploy: AWS role, Cloudflare token, GitHub token, edge
-secret — restricted to foldrun-infra on `main`) and `foldrun-ci` (the
-GitHub token for sibling clones and release tags — restricted to the four
-private repos' projects). Fork pull requests to public repos run with no
+`foldrun-dev` (the deploy, restricted to foldrun-infra on `main`) and
+`foldrun-ci` (restricted to the four private repos' projects).
+
+GitHub access is the **foldrun-bot GitHub App**, not a person's token
+(3 Nov 2026). Each step mints an installation token (`contents: write`, one
+hour, `dev/ci/gh-app-token.sh`), and git asks for it through a credential
+helper, so no token sits in a remote URL. The org token is left in
+`foldrun-dev` alone, for the two things the App cannot do: push to GHCR (no
+packages permission) and, as a fallback, create a tag over changed workflow
+files (no workflows permission; `push_ref`, `release.sh`, `tag-components.sh`).
+Narrowing it further — a packages-only token, or packages and workflows
+permission on the App — is a GitHub web-UI change.
+AWS is OIDC (no keys); images are signed keyless (CircleCI OIDC).
+Fork pull requests to public repos run with no
 secrets.
 
 ## The dev pipeline (foldrun-infra, CircleCI)
