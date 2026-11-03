@@ -61,11 +61,12 @@ setting and never editable from a web page.
 | `schedule.spread_sec` | `FOLDRUN_SCHEDULE_SPREAD_SEC` | `0` | Scheduled runs start up to this many seconds after their minute, the same offset per flow every day. 0: on the minute. |
 | `billing.max_run_exposure` | `FOLDRUN_MAX_RUN_EXPOSURE` | unset | What admission holds of the balance for each unsettled run. 0: the flow's own history decides. Owners only. |
 | `models.supply.enabled` | `FOLDRUN_MODEL_SUPPLY` | `false` | foldrun's models: accounts may choose to run on the platform's model keys, billed per call from the price list. Off: nobody can, and calls on a lease already in use are refused. Owners only. Asks for a reason when turned on. |
-| `models.supply.providers` | `FOLDRUN_MODEL_SUPPLY_PROVIDERS` | `anthropic,openai,gemini,openrouter` | The providers offered. One is offered only where the platform holds its key (set in the console under Settings → Model keys, sealed in the database — never an environment variable) and, except anthropic, its tiers are set. Owners only. |
+| `models.supply.providers` | `FOLDRUN_MODEL_SUPPLY_PROVIDERS` | `anthropic,openai,gemini,deepseek,moonshot` | The providers offered. One is offered only where the platform holds its key (set in the console under Settings → Model keys, sealed in the database — never an environment variable) and, except anthropic, its tiers are set. Owners only. |
 | `models.supply.anthropic.tiers` | `FOLDRUN_MODEL_SUPPLY_ANTHROPIC_TIERS` | unset | `fast=<model id>,default=<model id>,max=<model id>`. Empty: the runtime's own Claude models. Owners only. |
 | `models.supply.openai.tiers` | `FOLDRUN_MODEL_SUPPLY_OPENAI_TIERS` | unset | The same for OpenAI. Empty: OpenAI is not offered. Owners only. |
 | `models.supply.gemini.tiers` | `FOLDRUN_MODEL_SUPPLY_GEMINI_TIERS` | unset | The same for Gemini. Empty: Gemini is not offered. Owners only. |
-| `models.supply.openrouter.tiers` | `FOLDRUN_MODEL_SUPPLY_OPENROUTER_TIERS` | unset | The same for OpenRouter. Empty: OpenRouter is not offered. Owners only. |
+| `models.supply.deepseek.tiers` | `FOLDRUN_MODEL_SUPPLY_DEEPSEEK_TIERS` | unset | The same for DeepSeek. Empty: DeepSeek is not offered. Owners only. |
+| `models.supply.moonshot.tiers` | `FOLDRUN_MODEL_SUPPLY_MOONSHOT_TIERS` | unset | The same for Moonshot Kimi. Empty: Moonshot Kimi is not offered. Owners only. |
 | `models.supply.daily_usd` | `FOLDRUN_MODEL_SUPPLY_DAILY_USD` | `50` | What one account's calls on the platform's model keys may cost per UTC day, at the price list before margin. An account's own lever overrides it. 0: no cap. Owners only. Asks for a reason when raised. |
 
 The hosted build adds its own (prices, billing, the Stripe catalogue —
