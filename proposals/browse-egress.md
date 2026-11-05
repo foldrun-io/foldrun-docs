@@ -176,3 +176,54 @@ granted to fails), a DNS-restricting resolver (DNS lookups are not held),
 Lightpanda/Obscura proxy adapters, live sessions under a held list, Firefox
 and WebKit trust of the egress CA, and per-lease browser pods (above).
 
+## FOL-128 as built (5 Nov 2026) — the first two of those
+
+Debated with Codex over two rounds before any code.
+
+**DNS: none at all for a walled pod, not a filtered resolver.** A Cilium
+DNS-aware policy (answer only the names the list allows) was the other
+option. It was dropped: Cilium-only, a policy object per step to write and
+collect, a wildcard site still lets a lookup under it reach that domain's
+nameserver — and the pod needs no answers, because every program names its
+site to the proxy (`CONNECT host:port`) and the proxy resolves only what the
+list allows, after checking it. So with `FOLDRUN_RUN_DNS_WALL=1` a filtered
+pod is labelled `foldrun.io/dns: none`; `foldrun-run-dns`, the run DNS rule
+now in a policy of its own, does not select it (NetworkPolicies add up, so
+`foldrun-run-egress` must never grant DNS again — a platform test reads the
+manifest for that). The pod gets `dnsPolicy: None` with a nameserver that is
+not there (a lookup fails at once, no packet leaves) and the egress
+address in `/etc/hosts`, which the worker looks up when it makes the pod; a
+step whose proxy address cannot be found does not start. The switch rides
+in foldrun-infra's base manifests with the policy, so the two cannot skew;
+a pod without the label keeps DNS, so the platform and the manifests roll
+out in either order. Checked: the pinned Claude CLI, behind a proxy, sends a
+name it cannot resolve to the proxy as a CONNECT, with or without
+`CLAUDE_CODE_PROXY_RESOLVES_HOSTS` — so that variable is not set.
+
+What breaks in a walled pod: what asks DNS itself — `dig`, `ping` by name,
+an MX check, a client that resolves before it connects. Its way out is a
+DNS-over-HTTPS site on its list, or `network: open`. What stays: the proxy
+resolves names an allowed wildcard covers, and a tunnel to an allowed host
+may use any port — both bounded by the list.
+
+`dev/ci/isolation-probe.sh` builds its filtered pod the platform's way and
+asks a never-asked name over UDP and TCP of the cluster's resolver Service,
+each CoreDNS pod, the node and the NodeLocal DNSCache default address: no
+DNS answer may come back. The ordinary pod's answers from the Service and a
+CoreDNS pod are the control. The egress control is reached by name, so it
+proves the `/etc/hosts` entry too.
+
+**WebSocket to a bound site.** The intercepted connection now passes an
+HTTP/1.1 `Upgrade: websocket`: the opening request is filled by the same
+code as any request (`prepareRequest`: URL, headers, Basic auth, no secret
+in the authority; the same client certificate and DPoP rules), sent over
+TLS to a public address, and on the site's 101 the frames are piped both
+ways, unread, until either side closes or the lease ends. Any other answer
+goes back as it is. Refused: another upgrade token (501), the platform's
+model keys (metered per request, which a WebSocket has none of), and a test
+run's WebSocket to a site test mode does not hold read-safe.
+
+Still owed: the owner's word on running the browser in the step's own pod
+(above), Kousha's re-test, web search under a held list, and phases 2
+(browse service) and 4 (vendor door).
+
