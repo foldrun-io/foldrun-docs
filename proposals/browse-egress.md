@@ -123,7 +123,7 @@ the full runner image, as the browser pod does today.
 |---|---|---|
 | 1. Labels and admission | deployed on dev (v2026.11.02.2, 2 Nov); not yet clicked through — dev moved to AWS and has no account with an agent yet | core d684047, web 6f7f5fe, cli b215e07, docs 0ca9f0e |
 | 2. Browse service | planned | |
-| 3. Hosted enforcement | built 5 Nov 2026 behind `FOLDRUN_BROWSE_ENFORCE=1` (k8s only), in the browser-in-the-step shape below; not yet pushed or deployed | branch `fol-n` |
+| 3. Hosted enforcement | built 5 Nov 2026 behind `FOLDRUN_BROWSE_ENFORCE=1` (k8s only), in the browser-in-the-step shape below; web search through the proxy's door (FOL-128, below) | branch `fol-n`; search on `wk-s` |
 | 4. Vendors | planned | |
 
 ## Phase 3 as built (5 Nov 2026) — an amendment for the owner to confirm
@@ -223,7 +223,71 @@ goes back as it is. Refused: another upgrade token (501), the platform's
 model keys (metered per request, which a WebSocket has none of), and a test
 run's WebSocket to a site test mode does not hold read-safe.
 
+## Web search under a held list, as built (5 Nov 2026, FOL-128)
+
+Owner, 5 Nov 2026: search should work for a held step. Debated with Codex
+over two design rounds before the code, and a code review after.
+
+**What was broken.** Not only browsing steps: every walled step (`filtered`
+pod) that searched our engine was handed the search pod's address, which
+its wall drops — three retries, then "unreachable". A named provider
+(`web: {search: brave}`) worked: its host is declared, its key filled at
+the proxy.
+
+**Semantics.** The account's engine is a platform service reached through
+the egress proxy, never a site on the list. Search is a declared way out for
+the *words* of a query — nothing can stop words carrying what the step
+knows (an engine sees them; a site owner can see the queries its pages
+appeared for). The door bounds where they go and records that they went; it
+does not make a query safe to fill with secrets. Results are data, off-list
+snippets included; opening a result is a fetch, held to the list.
+
+What ships:
+
+- **Core** (`search-egress.ts` `searchDoorWanted`, `runner.ts`): after the
+  lease, from the runner's own resolved `web:` config and the lease's
+  effective enforce (the install's switch too), a walled step that searches
+  our engine gets `grant.search` (with `max` from `limits:`), sealed in the
+  lease, and the door's address for the driver. At `none` or `defaults:
+  false` the action must be written in `web: {actions: [...]}`; a bare
+  `tools: [web]` is not given it, and the trace says why. Off a held list:
+  nothing changes.
+- **Platform**: the proxy's door `/s/<lease>/search|config`
+  (`search-door.ts`) answers only a grant with `search`; it rebuilds the
+  upstream query itself — a fixed engine list (`yandex, naver, brave,
+  wikipedia`; `arxiv, pubmed`; `github, stackoverflow`), always sent as an
+  explicit list the instance has loaded (SearXNG given none it knows falls
+  back to its defaults), and an answer naming any other engine is refused;
+  bangs, `<n` timeouts, control and format characters, URLs and `${NAME}`
+  placeholders in the query refused in fixed words; no plugin, DOI resolver
+  or timeout from the caller; JSON only, no redirect, the answer cut to what
+  the tool reads; a per-lease count shared across replicas in Redis (a
+  store that cannot count sends nothing), four at a time per replica; a
+  trace line written before each search is sent (engines and length, never
+  the words, which would sit unredacted in the lease store). The door is
+  closed when the install's search image is not the digest its engines
+  were read in. The k8s driver points a walled step's tool at the door
+  (`FOLDRUN_SEARCH_HELD=1`: the tool keeps the door's path and opens held
+  results with an outside-content line); the search pod's own policy now
+  admits the proxy (worker or egress pods, namespace and pod in one peer,
+  TCP 8080), and an older pool's policies are applied again once per worker.
+- **Infra**: the worker's and egress pods' policies may reach
+  `app=foldrun-search` in `foldrun-runs` on 8080; the filtered run pod's
+  wall is unchanged. `dev/ci/isolation-probe.sh` stands up a stand-in search
+  pod with the Service and policies the running worker's code writes: the
+  filtered pod must not reach it (pod address and Service), the proxy must.
+- **Dashboard / CLI**: the Network card and `foldrun agent network` say how
+  a held step searches, or that it is not offered.
+
+Not claimed: that a query cannot exfiltrate (it can, by its words, to the
+engines and to whatever they report to site owners); that every engine in
+the list was qualified against the pinned image by running it (they were
+read in upstream source; the digest pin forces a re-read on a new image);
+an in-flight cap across replicas (the count is shared, the four-at-once is
+per replica); per-action `limits:` at the door (it holds their sum); full
+query words in the proxy's trace (the tool call carries them).
+
 Still owed: the owner's word on running the browser in the step's own pod
-(above), Kousha's re-test, web search under a held list, and phases 2
-(browse service) and 4 (vendor door).
+(above), Kousha's re-test (now with search), the door verified on dev, and
+phases 2 (browse service) and 4 (vendor door).
 
