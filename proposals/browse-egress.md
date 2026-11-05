@@ -122,8 +122,8 @@ the full runner image, as the browser pod does today.
 | Phase | Status | Shipped in |
 |---|---|---|
 | 1. Labels and admission | deployed on dev (v2026.11.02.2, 2 Nov); not yet clicked through — dev moved to AWS and has no account with an agent yet | core d684047, web 6f7f5fe, cli b215e07, docs 0ca9f0e |
-| 2. Browse service | planned | |
-| 3. Hosted enforcement | built 5 Nov 2026 behind `FOLDRUN_BROWSE_ENFORCE=1` (k8s only), in the browser-in-the-step shape below; web search through the proxy's door (FOL-128, below) | branch `fol-n`; search on `wk-s` |
+| 2. Browse service | built 5 Nov 2026 behind `FOLDRUN_BROWSE_SERVICE=1` (k8s only), off everywhere; for steps **not** held to their list (a held step keeps its browser in its walled pod, decision 2 as amended); Chromium and Chrome; vendors, live, Lightpanda/Obscura, Firefox/WebKit and extensions stay in the step — see *Phase 2 as built* | on main |
+| 3. Hosted enforcement | live on dev since v2026.11.05.3 (5 Nov 2026), `FOLDRUN_BROWSE_ENFORCE=1` (k8s only), in the browser-in-the-step shape below (owner accepted, 5 Nov); a held pod has no DNS since v2026.11.05.4; web search through the proxy's door (FOL-128, below) | core eead367, platform 4cc7432, infra 8699c66 + d9f7c49 |
 | 4. Vendors | planned | |
 
 ## Phase 3 as built (5 Nov 2026) — an amendment for the owner to confirm
@@ -291,3 +291,76 @@ Still owed: the owner's word on running the browser in the step's own pod
 (above), Kousha's re-test (now with search), the door verified on dev, and
 phases 2 (browse service) and 4 (vendor door).
 
+## Phase 2 as built (5 Nov 2026)
+
+Debated with Codex over two rounds before and during the code. The owner
+had by then accepted the browser-in-the-step shape for a **held** step
+(phase 3), so the service is built for the other steps: an open list, a
+report-only one, an install that does not confine browsing — today's
+browsers that reach the world straight from the sandbox.
+
+**A pod per step lease, not the account's pool.** The service holds the
+step's lease (its browser's proxy password) and the secrets a call names; a
+pool would put two steps under one user and process tree, so a page that
+broke out of one step's Chromium could read the other's. `foldrun-browse-<16
+hex of the lease's SHA-256>`, made beside the run pod (`ownerReference` to
+it, deleted in the step's `finally`, billed as `browse`; an orphan — a run
+pod gone or finished — is swept on the scheduler's tick), on the runner
+image (no new image), gVisor like a run pod, no service-account token,
+read-only root. Its program is a ConfigMap named by its content
+(`browse-service.mjs` and the **gallery's** `browse.mjs` — never an
+account's copy), server-side applied; old ones a day unused are collected.
+
+**Reached only through the egress proxy:** `/browse/<lease>`. The proxy
+checks the lease, refuses a test run, a host job and a held lease (its own
+check; a held step is never given the door), and sends the call to the
+lease's own pod, by name, from the lease — nothing in the request picks it.
+The pod answers only a call whose lease hashes to its own
+`FOLDRUN_BROWSE_LEASE_ID` (the token is never in a cluster object). Its
+network policy, applied with every pod because the run namespace has no
+default deny: in, the proxy (or the worker, where the proxy runs there) on
+3100; out, the proxy on 8090 and DNS. foldrun-infra's proxy and worker
+policies carry the matching rules. No separate key: the lease is the
+per-step credential, dies with the step, and the network says who knocks.
+
+**One call:** the sandbox's `web` tool (`run.mjs` → `browse-remote.mjs`, a
+new file of the gallery tool; copies nobody edited are upgraded as every
+gallery change is) sends the arguments, the browse settings and the
+variables the call names (a secret's NAME in `cookies=`, `auth=`, headers,
+a login), and the workspace files it reads — the aria numbers, sessions as
+storage state, the named saved login, the diff baselines or crawl frontier,
+any upload, paste, mock or init file the call names — read without following
+a symlink, 64 MB at most. The service runs the platform's `browse.mjs` in a
+fresh scratch tree with an environment it builds from a positive list (the
+browse settings, secret-shaped names that steer no program; never
+`NODE_OPTIONS`, `LD_*`, proxy variables or `PLAYWRIGHT_*`), plus the proxy
+under the lease, the live-view door, `FOLDRUN_BROWSER_CONFINED=1` (the
+browser takes the proxy as launch options — phase 3's code) and
+`FOLDRUN_BROWSE_SERVICE_SIDE=1` (a session is storage state; loopback is not
+bypassed). The answer streams back; files the call wrote come back and are
+written by rename, never through a symlink. A copy of `browse.mjs` that is
+not the platform's (by SHA-256) is answered 409 and runs in the step.
+
+**Never twice.** A call that never connected (refused, no name) runs in the
+step; a call the service refused before starting (403, 409, 429, 503) too.
+Once it may have started — the stream began, or the connection failed in
+any other way — it is not run again anywhere; it fails saying it may have
+acted. A call whose caller left while it waited its turn never starts, and
+a call whose caller leaves is killed with its process group.
+
+**Not through the service (in the step, as before):** `live:`, Firefox,
+WebKit, Lightpanda, Obscura, `extensions:`, `proxy=`, identities with a
+proxy or another engine, a page on loopback or a private address, vendors
+(no vendor runs through it yet — that is phase 4's door). Verified: the
+unit tests (door, pod objects, service, shim, lifecycle with a fake
+kubectl) and, with real Chromium, the action suite — text, markdown,
+screenshot, fill/click/get, upload, download, PDF, a session across calls,
+a saved login, aria numbers used by the next call — through shim → door →
+service → Chromium → forward door, the proxy's own record naming the pages.
+Not yet on a cluster: turning it on is `FOLDRUN_BROWSE_SERVICE=1` on the
+worker and the egress proxy together (foldrun-infra), then a browsing desk.
+
+Owed: the service under a held list (it would make a held step's browser a
+separate pod, phase 3's "next step if wanted"), vendors through it with the
+public proxy door (phase 4), live sessions in it, Firefox and WebKit, and
+Chromium's own sandbox inside the pod (off, as in every runner today).
