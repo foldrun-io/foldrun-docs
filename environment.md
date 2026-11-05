@@ -240,6 +240,8 @@ self-hosted install reads the variable as before.
 | variable | |
 |---|---|
 | `FOLDRUN_METRICS_TOKEN` | the bearer a scraper presents to `/api/metrics` |
+| `FOLDRUN_OPS_OTLP_URL` | where the worker sends each finished run's **ops trace** — the platform's own, OTLP/HTTP JSON (`…/v1/traces`; http or https, redirects refused): its funnel from submitted to finished, one span per stage, with ops-log fields only ([what it carries](security#what-our-telemetry-carries)). Unset: none is sent. Needs a database (the trace is sent once, from the run's wide event, and retried by the hourly pass up to five times). foldrun's manifests set it with the observability component, to its Alloy. Not an account's `telemetry:` |
+| `FOLDRUN_OPS_OTLP_TOKEN` | a bearer token sent with the ops trace, when the collector wants one |
 | `FOLDRUN_CSP` | `report-only` sends the dashboard's Content-Security-Policy as `Content-Security-Policy-Report-Only`: violations are reported in the browser, not blocked. Unset: enforced (since 28 Oct 2026). A way back while you find what a page needs, not a setting to leave on |
 | `FOLDRUN_STATUS_ORIGINS` | comma-separated origins allowed to read `/api/status` and `/api/status/history` from a browser. Unset: `https://foldrun.io`, `https://www.foldrun.io`, `https://status.foldrun.io` |
 | `FOLDRUN_STATUS_PAGE_URL` | where the dashboard's **Status** link and `/status` go. Unset: `https://foldrun.io/status/` |
