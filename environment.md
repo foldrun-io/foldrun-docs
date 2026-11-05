@@ -98,6 +98,7 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or operator console to turn on |
 | `FOLDRUN_VERSION` | the version `/api/healthz` and the dashboard report (default `dev`); set by the image build |
 | `FOLDRUN_ACCOUNT` | the account folder, for a program that embeds foldrun and knows where its account is. Beats the usual search upward from the working directory |
+| `FOLDRUN_LOG_MODE` | `raw` keeps a server process out of the [log boundary](security#what-our-telemetry-carries): its logs then print errors in full, account content included. Unset: every hosted process (web under `next start`, worker, egress, assistant) writes only shaped ops lines; `next dev` is always raw. For your own machine when debugging; foldrun's manifests never set it, and infra's tests refuse it |
 
 ## Models
 
