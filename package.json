@@ -18,7 +18,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^7.2.9",
-    "@foldrun/ui": "github:foldrun-io/foldrun-ui#v0.1.2"
+    "@foldrun/ui": "github:foldrun-io/foldrun-ui#v0.2.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
