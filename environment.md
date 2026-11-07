@@ -70,6 +70,7 @@ setting and never editable from a web page.
 | `models.supply.deepseek.tiers` | `FOLDRUN_MODEL_SUPPLY_DEEPSEEK_TIERS` | unset | The same for DeepSeek. Empty: DeepSeek is not offered. Owners only. |
 | `models.supply.moonshot.tiers` | `FOLDRUN_MODEL_SUPPLY_MOONSHOT_TIERS` | unset | The same for Moonshot Kimi. Empty: Moonshot Kimi is not offered. Owners only. |
 | `models.supply.daily_usd` | `FOLDRUN_MODEL_SUPPLY_DAILY_USD` | `50` | What one account's calls on the platform's model keys may cost per UTC day, at the price list before margin. An account's own lever overrides it. 0: no cap. Owners only. Asks for a reason when raised. |
+| `models.supply.finish_grace_usd` | `FOLDRUN_RUN_FINISH_GRACE_USD` | `1` | How far past zero bought credit a run already using foldrun's models may go to finish, per run, in dollars. A new run is still refused at zero; this only lets one that has started end instead of being cut off, charged in full: the balance goes negative until the next purchase. 0: every call stops at zero. Owners only. Asks for a reason when raised. |
 
 The hosted build adds its own (prices, billing, the Stripe catalogue —
 `FOLDRUN_MARGIN`, `FOLDRUN_BILLING`, `STRIPE_PRICE_*` and the rest); an
