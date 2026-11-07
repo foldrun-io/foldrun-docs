@@ -1,0 +1,23 @@
+---
+// Reading order is the sidebar's order: the previous and the next doc.
+import Icon from "@foldrun/ui/components/Icon.astro";
+interface Link { slug: string; title: string }
+interface Props { prev: Link | null; next: Link | null }
+const { prev, next } = Astro.props;
+---
+{(prev || next) && (
+  <nav aria-label="Previous and next" class="mt-14 grid gap-3 border-t pt-8 sm:grid-cols-2">
+    {prev ? (
+      <a href={`/${prev.slug}/`} class="group rounded-xl border bg-surface px-5 py-4 transition-colors hover:border-line-strong">
+        <span class="flex items-center gap-1 text-xs text-fg-muted"><Icon name="arrow-right" class="size-3 rotate-180" />Previous</span>
+        <span class="mt-1 block font-medium">{prev.title}</span>
+      </a>
+    ) : <span />}
+    {next && (
+      <a href={`/${next.slug}/`} class="group rounded-xl border bg-surface px-5 py-4 text-right transition-colors hover:border-line-strong sm:col-start-2">
+        <span class="flex items-center justify-end gap-1 text-xs text-fg-muted">Next<Icon name="arrow-right" class="size-3" /></span>
+        <span class="mt-1 block font-medium">{next.title}</span>
+      </a>
+    )}
+  </nav>
+)}

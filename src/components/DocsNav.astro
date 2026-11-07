@@ -1,0 +1,25 @@
+---
+// Every doc, grouped: the sidebar on wide screens and the "Browse docs"
+// list on phones. Built from the same grouping the index and the dashboard
+// use, so adding foo.md puts it here with no code change.
+export interface NavGroup { title: string; docs: { slug: string; title: string }[] }
+interface Props { groups: NavGroup[]; current?: string }
+const { groups, current } = Astro.props;
+---
+<a href="/" aria-current={current ? undefined : "page"} class="block text-sm font-medium text-fg-muted transition-colors hover:text-fg aria-[current=page]:text-fg">Documentation</a>
+{groups.map((g) => (
+  <div class="mt-6">
+    <p class="text-xs font-medium text-fg-muted">{g.title}</p>
+    <ul class="mt-2 space-y-0.5 border-l">
+      {g.docs.map((d) => (
+        <li>
+          <a
+            href={`/${d.slug}/`}
+            aria-current={d.slug === current ? "page" : undefined}
+            class="-ml-px block border-l border-transparent py-1 pl-3 text-sm text-fg-muted transition-colors hover:border-line-strong hover:text-fg aria-[current=page]:border-fg aria-[current=page]:font-medium aria-[current=page]:text-fg"
+          >{d.title}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+))}

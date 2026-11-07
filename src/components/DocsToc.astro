@@ -1,0 +1,14 @@
+---
+// The current page's own outline: h2 and h3 from Astro's heading list, so
+// it cannot disagree with the page.
+interface Props { headings: { depth: number; slug: string; text: string }[] }
+const { headings } = Astro.props;
+---
+<p class="text-xs font-medium text-fg-muted">On this page</p>
+<ul class="mt-3 space-y-1.5 border-l">
+  {headings.map((h) => (
+    <li class={h.depth === 3 ? "pl-6" : "pl-3"}>
+      <a href={`#${h.slug}`} class="-ml-px block text-sm leading-snug text-fg-muted transition-colors hover:text-fg">{h.text}</a>
+    </li>
+  ))}
+</ul>

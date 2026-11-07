@@ -18,7 +18,7 @@ export default defineConfig({
   markdown: {
     // [[scaling-adr]] in a doc becomes a link to that doc. See doc-links.ts.
     processor: satteri({ mdastPlugins: [docLinks()] }),
-    shikiConfig: { theme: "github-dark-default" },
+    shikiConfig: { themes: { light: "github-light", dark: "github-dark-default" } },
   },
   vite: { plugins: [tailwind()] },
 });

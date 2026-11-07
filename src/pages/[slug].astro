@@ -6,6 +6,7 @@
 // reader see without an account existing.
 
 import Docs from "../layouts/Docs.astro";
+import Prose from "@foldrun/ui/components/Prose.astro";
 import { getCollection, render } from "astro:content";
 import { docTitle, docSummary } from "../lib/docs.ts";
 
@@ -33,7 +34,7 @@ const { Content, headings } = await render(entry);
   <!-- The markdown's own H1 is the page heading. Rendering `title` here too
        would print it twice; the dashboard strips the H1 instead, which it
        can do because it renders from the raw string. -->
-  <article class="doc max-w-3xl">
-    <Content />
+  <article class="max-w-3xl">
+    <Prose><Content /></Prose>
   </article>
 </Docs>

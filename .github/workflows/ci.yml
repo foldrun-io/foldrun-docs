@@ -4,6 +4,7 @@ name: ci
 # hook (SKIP_HOOKS=1, --no-verify, a web edit, a PR from elsewhere) is still
 # checked. Keep the two in step — checks.sh is the list.
 #
+#   check-native          no <details>/<select>/title= tooltips … (@foldrun/ui)
 #   astro check           types and content collections, blocking
 #   astro build           to a temp dir; the build Cloudflare Pages runs
 #   gitleaks              the pushed commits and the tree, as the hook does
@@ -74,6 +75,8 @@ jobs:
           node-version: "22.23.4" # Astro needs >= 22.23.4; "22" resolved to 22.23.3 on hosted runners
           cache: npm
       - run: npm ci
+      - name: no browser-native controls (@foldrun/ui check-native)
+        run: npx --no-install foldrun-ui-check-native src *.md
       - run: npx --no-install astro check
       - name: astro build (to a temp dir)
         # Inside the checkout, not $RUNNER_TEMP: in a container job the two are

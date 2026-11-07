@@ -11,6 +11,8 @@
 // card here with no code change.
 
 import Docs from "../layouts/Docs.astro";
+import CodePanel from "@foldrun/ui/components/CodePanel.astro";
+import Card from "@foldrun/ui/components/Card.astro";
 import { getCollection } from "astro:content";
 import { groupedDocs, docTitle, docSummary } from "../lib/docs.ts";
 
@@ -28,6 +30,15 @@ const groups = groupedDocs()
       }),
   }))
   .filter((g) => g.docs.length);
+
+// A heading id from a group title: lowercase words joined by hyphens.
+const slugOf = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+const quickstart = `npm install -g foldrun
+
+foldrun init my-workspace     # a workspace that already runs
+foldrun check                 # validate everything — no model is called
+foldrun run publish           # run it, locally, for real`;
 ---
 
 <Docs
@@ -35,41 +46,25 @@ const groups = groupedDocs()
   description="Agents are just folders and flows are numbered lists, so there is no build step: edit, check, run, deploy. Start on your own machine — none of it needs an account."
 >
   <div class="max-w-3xl">
-    <h1 class="text-4xl font-semibold tracking-tight text-zinc-50">Documentation</h1>
-    <p class="mt-4 leading-relaxed text-zinc-400">
+    <h1 class="t-display text-4xl sm:text-5xl">Documentation</h1>
+    <p class="t-lead mt-5">
       Agents are just folders and flows are numbered lists, so there is no build
       step: edit, check, run, deploy. Start on your own machine — none of it
       needs an account.
     </p>
 
-    <div
-      class="mt-8 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-900 p-4 font-mono text-sm leading-relaxed text-zinc-300"
-    >
-      <pre><code>npm install -g foldrun
+    <CodePanel class="mt-8" tabs={[{ id: "start", label: "Terminal", code: quickstart }]} title="Start on your machine" />
 
-foldrun init my-workspace     # a workspace that already runs
-foldrun check                 # validate everything — no model is called
-foldrun run publish           # run it, locally, for real</code></pre>
-    </div>
-
-    {
-      groups.map((group) => (
-        <section class="mt-12">
-          <h2 class="text-lg font-semibold tracking-tight text-zinc-100">{group.title}</h2>
-          <p class="mt-1.5 leading-relaxed text-zinc-400">{group.blurb}</p>
-          <div class="mt-5 grid gap-3 sm:grid-cols-2">
-            {group.docs.map((doc) => (
-              <a
-                href={`/${doc.slug}/`}
-                class="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-zinc-600 hover:bg-zinc-900"
-              >
-                <h3 class="font-medium text-zinc-100">{doc.title}</h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-zinc-400">{doc.summary}</p>
-              </a>
-            ))}
-          </div>
-        </section>
-      ))
-    }
+    {groups.map((group) => (
+      <section class="mt-14" aria-labelledby={`group-${slugOf(group.title)}`}>
+        <h2 id={`group-${slugOf(group.title)}`} class="text-xl font-semibold tracking-[-0.02em]">{group.title}</h2>
+        <p class="mt-1.5 leading-relaxed text-fg-muted">{group.blurb}</p>
+        <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+          {group.docs.map((doc) => (
+            <li class="min-w-0"><Card href={`/${doc.slug}/`} title={doc.title} body={doc.summary} /></li>
+          ))}
+        </ul>
+      </section>
+    ))}
   </div>
 </Docs>

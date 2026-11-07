@@ -4,6 +4,7 @@
 # .github/workflows/ci.yml runs the same list; the site build is what Cloudflare Pages runs. The
 # build goes to a temp dir so dist/ is left as it was.
 repo_checks() {
+  step "no native browser controls" npx --no-install foldrun-ui-check-native src *.md
   step "astro check" npx --no-install astro check
   step "astro build (to a temp dir)" astro_build
 }

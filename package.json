@@ -12,12 +12,13 @@
     "dev": "astro dev --port 4340",
     "build": "astro build",
     "preview": "astro preview --port 4340",
-    "check": "astro check",
+    "check": "foldrun-ui-check-native src *.md && astro check",
     "prepare": "(test ! -f .githooks/install.sh || sh .githooks/install.sh)"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.2.9"
+    "astro": "^7.2.9",
+    "@foldrun/ui": "github:foldrun-io/foldrun-ui#v0.1.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
