@@ -36,13 +36,29 @@ title and a summary out of the markdown. The dashboard imports the same file
 through a tsconfig alias. Adding `foo.md` and naming it in a group puts it in
 the sidebar of both, with no other change.
 
-## The shell is a near-copy of foldrun-site's
+## The look is @foldrun/ui, shared with foldrun.io
 
-`src/layouts/Page.astro`, `src/lib/site.ts` and `src/styles/global.css` are
-about seventy lines of header, footer and type, duplicated on purpose: the two
-sites are separate projects on separate domains, and sharing a component would
-mean sharing a build. When one changes, change both — they are meant to look
-like one product.
+The shell (header, footer, theme switch), the prose, code panels, cards and
+the tokens come from [`@foldrun/ui`](https://github.com/foldrun-io/foldrun-ui),
+the components foldrun.io uses too — a git dependency pinned to a tag in
+`package.json`. This repo keeps its words and links (`src/lib/site.ts`), the
+docs layout (`src/layouts/Docs.astro`) and three small pieces built from the
+shared ones (`src/components/`: the sidebar, the page outline, previous and
+next). A change to the look is a change in foldrun-ui, then a new tag here.
+`npm run check` also runs `foldrun-ui-check-native` over `src/` and the
+markdown: no browser-native controls.
+
+## Environment
+
+Set at the host (the Cloudflare Pages project), never committed. Each default
+is written once, in `src/lib/site.ts`.
+
+| Variable | What it is | Default if unset |
+|---|---|---|
+| `PUBLIC_DOCS_URL` | this site's own origin — canonical URLs, the sitemap | `https://docs.foldrun.io` |
+| `PUBLIC_SITE_URL` | foldrun.io, for the links back | `https://foldrun.io` |
+| `PUBLIC_APP_URL` | the dashboard: Sign in, Get started, the sign-up switches | `https://dash.foldrun.io` (production sets `https://dev.foldrun.io` until dash exists) |
+| `PUBLIC_STATUS_API` | the footer's status dot | `https://dev.foldrun.io/api/status` |
 
 ## Git hooks
 

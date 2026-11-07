@@ -6,7 +6,7 @@
 // Here production opens the door; anything else closes it.
 
 import type { APIRoute } from "astro";
-import { DOCS_URL } from "../lib/site.ts";
+import { DOCS_URL, APP_HOST } from "../lib/site.ts";
 
 const PROD_ORIGIN = "https://docs.foldrun.io";
 
@@ -15,7 +15,7 @@ export const GET: APIRoute = () => {
   const body = isProd
     ? [
         "# The docs are the surface a first-time reader finds, so they are",
-        "# open; app.foldrun.io serves the dashboard behind a login and is not.",
+        `# open; ${APP_HOST} serves the dashboard behind a login and is not.`,
         "User-agent: *",
         "Allow: /",
         "",
