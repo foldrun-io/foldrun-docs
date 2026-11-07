@@ -30,7 +30,7 @@ setting and never editable from a web page.
 
 | setting | variable (fallback) | default | |
 |---|---|---|---|
-| `signup.open` | `FOLDRUN_OPEN_SIGNUP` | `false` | Strangers may create accounts. Off: invite-only once the first account exists. Owners only. Asks for a reason when turned on. |
+| `signup.open` | `FOLDRUN_OPEN_SIGNUP` | `false` | Strangers may create accounts. Off: invite-only once the first account exists. Owners only. Asks for a reason when turned on. On foldrun's hosted platform it is labelled **Free sign-up**: an account without paying. |
 | `plan.concurrency` | `FOLDRUN_PLAN_CONCURRENCY` | unset | Runs one account drives at once when its plan says nothing. 0: no cap. |
 | `plan.workspaces` | `FOLDRUN_PLAN_WORKSPACES` | unset | Workspaces an account may create when its plan says nothing. 0: no cap. |
 | `account.concurrency` | `FOLDRUN_ACCOUNT_CONCURRENCY` | unset | Runs one account may have in flight across every worker, unless its plan gives more. 0: no cap. |
@@ -73,7 +73,14 @@ setting and never editable from a web page.
 
 The hosted build adds its own (prices, billing, the Stripe catalogue —
 `FOLDRUN_MARGIN`, `FOLDRUN_BILLING`, `STRIPE_PRICE_*` and the rest); an
-install built from the public repositories has none of them.
+install built from the public repositories has none of them. Among them is
+`signup.paid` (`FOLDRUN_PAID_SIGNUP`, default off, owners only, asks for a
+reason when turned on): strangers may open an account by choosing a plan.
+It is in effect only when billing is enforced, Stripe's key and webhook
+secret are set, a plan in the catalogue is marked purchasable and the paid
+sign-up flow exists; the operator console shows each sign-up switch as set
+and as in effect, with why not. On a public build there is no paid sign-up
+and `GET /api/signup` always answers `paid: false`.
 
 `FOLDRUN_PLATFORM_KEY_ACCOUNTS` is not a setting but, on the hosted
 platform, a per-account lever: an account may use the platform's own model
@@ -93,7 +100,7 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_PUBLIC_URL` | the origin the outside world reaches this install on; needed for approve links and shares |
 | `FOLDRUN_TRUST_PROXY` | `1` behind a proxy, tunnel or load balancer — the rate limiter reads the forwarded address (`X-Forwarded-For`). `cloudflare` behind Cloudflare — it reads `CF-Connecting-IP`, which Cloudflare writes over whatever the client sent, and never `X-Forwarded-For` |
 | `FOLDRUN_EDGE_SECRET` | required by `FOLDRUN_TRUST_PROXY=cloudflare`: `CF-Connecting-IP` counts only when the request carries `X-Foldrun-Edge` equal to this, which a request header rule in your Cloudflare zone sets at the edge. A Cloudflare address alone proves nothing (anyone's Worker can call your origin and set the header). Unset or empty: no address, and per-IP limits limit no one. The mode reads only the address; links come from `FOLDRUN_PUBLIC_URL`, so set it |
-| `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts. Last switch on. Since 30 Oct 2026 an [operator setting](#operator-settings), `signup.open`: on foldrun's hosted platform it is edited in the operator console; this variable is its fallback, and how a self-hosted install sets it. |
+| `FOLDRUN_OPEN_SIGNUP` | `1` lets strangers create accounts (on the hosted platform: free sign-up). Last switch on. Since 30 Oct 2026 an [operator setting](#operator-settings), `signup.open`: on foldrun's hosted platform it is edited in the operator console; this variable is its fallback, and how a self-hosted install sets it. |
 | `FOLDRUN_SETUP_TOKEN` | when set, the install's first account (its owner) can be created only with it: `/signup?setup=<token>`. The self-hosting installer writes one to `.env` and prints that link, so another user of the same machine cannot sign up first. Unset, the first signup is free; once any account exists it does nothing |
 | `FOLDRUN_MULTI_TENANT` | `1` on any install that will serve more than one account — refuses to run without step isolation |
 | `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or operator console to turn on |
@@ -245,6 +252,7 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_OPS_OTLP_URL` | where the worker sends each finished run's **ops trace** — the platform's own, OTLP/HTTP JSON (`…/v1/traces`; http or https, redirects refused): its funnel from submitted to finished, one span per stage, with ops-log fields only ([what it carries](security#what-our-telemetry-carries)). Unset: none is sent. Needs a database (the trace is sent once, from the run's wide event, and retried by the hourly pass up to five times). foldrun's manifests set it with the observability component, to its Alloy. Not an account's `telemetry:` |
 | `FOLDRUN_OPS_OTLP_TOKEN` | a bearer token sent with the ops trace, when the collector wants one |
 | `FOLDRUN_CSP` | `report-only` sends the dashboard's Content-Security-Policy as `Content-Security-Policy-Report-Only`: violations are reported in the browser, not blocked. Unset: enforced (since 28 Oct 2026). A way back while you find what a page needs, not a setting to leave on |
+| `FOLDRUN_SIGNUP_ORIGINS` | comma-separated origins allowed to read `/api/signup` from a browser (the public site's sign-up buttons). Exact matches only. Unset: `https://foldrun.io`, `https://www.foldrun.io`, `https://docs.foldrun.io` |
 | `FOLDRUN_STATUS_ORIGINS` | comma-separated origins allowed to read `/api/status` and `/api/status/history` from a browser. Unset: `https://foldrun.io`, `https://www.foldrun.io`, `https://status.foldrun.io`, `https://docs.foldrun.io` |
 | `FOLDRUN_STATUS_PAGE_URL` | where the dashboard's **Status** link and `/status` go. Unset: `https://foldrun.io/status/` |
 | `FOLDRUN_STATUS_WEB_URL` | the address the status sampler fetches `/api/healthz` from to judge the dashboard and API. Unset: `FOLDRUN_PUBLIC_URL` — the path a customer takes |
