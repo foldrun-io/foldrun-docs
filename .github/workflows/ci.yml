@@ -7,6 +7,7 @@ name: ci
 #   check-native          no <details>/<select>/title= tooltips … (@foldrun/ui)
 #   astro check           types and content collections, blocking
 #   astro build           to a temp dir; the build Cloudflare Pages runs
+#   check-links           every page and #anchor a link inside the build names exists
 #   gitleaks              the pushed commits and the tree, as the hook does
 #
 # gitleaks here runs on its DEFAULT rules. The hook and the box deploy gate
@@ -83,6 +84,8 @@ jobs:
         # different mounts, and astro moves its assets with rename(), which
         # cannot cross them (EXDEV on the CI runner, 20 Oct 2026).
         run: npx --no-install astro build --outDir "$GITHUB_WORKSPACE/.ci-build-out"
+      - name: every link inside the build lands (scripts/check-links.mjs)
+        run: node scripts/check-links.mjs "$GITHUB_WORKSPACE/.ci-build-out"
 
       # The version the deploy gate pins (foldrun-infra dev/ci/scan.sh), as
       # the release binary checked against its published sha256. The range is

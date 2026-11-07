@@ -30,6 +30,10 @@ const RELATIVE_DOC = /^(?:\.\/)?([a-z0-9][a-z0-9-]*)(?:\.md)?\/?(#.*)?$/;
 
 const WIKILINK = /\[\[([^\]]+)\]\]/g;
 
+/** A file at this repo's root a doc links to, served from GitHub. */
+const REPO_FILE = /^LICENSE$/;
+const REPO_URL = "https://github.com/foldrun-io/foldrun-docs";
+
 // Annotated as the plugin type so `text`'s node and context are typed by the
 // pipeline rather than by a hand-written guess at its shape.
 export function docLinks(): MdastPluginDefinition {
@@ -65,6 +69,9 @@ export function docLinks(): MdastPluginDefinition {
       ctx.replaceNode(node, out);
     },
     link(node, ctx) {
+      // A repo file beside the docs (LICENSING.md's "[LICENSE](LICENSE)": the
+      // same file in every foldrun repo) is not a page here; on GitHub it is.
+      if (REPO_FILE.test(node.url)) return ctx.setProperty(node, "url", `${REPO_URL}/blob/main/${node.url}`);
       const m = RELATIVE_DOC.exec(node.url);
       if (m && shipped.has(m[1])) ctx.setProperty(node, "url", `/${m[1]}/${m[2] ?? ""}`);
     },

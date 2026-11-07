@@ -6,6 +6,7 @@
 repo_checks() {
   step "no native browser controls" npx --no-install foldrun-ui-check-native src *.md
   step "astro check" npx --no-install astro check
-  step "astro build (to a temp dir)" astro_build
+  step "astro build (to a temp dir) + every link lands" astro_build
 }
-astro_build() { local d rc; d=$(mktemp -d); npx --no-install astro build --outDir "$d/out"; rc=$?; rm -rf "$d"; return $rc; }
+# The build, then every link inside it lands (scripts/check-links.mjs).
+astro_build() { local d rc; d=$(mktemp -d); npx --no-install astro build --outDir "$d/out" && node scripts/check-links.mjs "$d/out"; rc=$?; rm -rf "$d"; return $rc; }
