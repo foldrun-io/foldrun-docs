@@ -43,7 +43,7 @@ setting and never editable from a web page.
 | `step.max_disk_gib` | `FOLDRUN_STEP_MAX_DISK_GIB` | unset | A step asking for more fails at once (no plan). 0: no cap beyond the pool. |
 | `room.run_memory_gib` | `FOLDRUN_RUN_MEMORY_GIB` | unset | Memory the run namespace may reserve; a step waits for room past it. 0: no limit. Never on an autoscaled cluster. Owners only. |
 | `room.run_disk_gib` | `FOLDRUN_RUN_DISK_GIB` | unset | Disk the run namespace's pods may be allowed together; a step waits past it. 0: no limit. Never on an autoscaled cluster. Owners only. |
-| `queue.max_waiting_runs` | `FOLDRUN_MAX_WAITING_RUNS` | unset | New runs are refused while an account has this many waiting for their turn. Unset: 20 for each run it may drive at once, at least 50. 0: no cap. See [runs waiting](budgets-and-billing#how-many-runs-may-wait). |
+| `queue.max_waiting_runs` | `FOLDRUN_MAX_WAITING_RUNS` | unset | New runs are refused while an account has this many waiting for their turn. Unset: the account's plan sets it (hosted), else 20 for each run it may drive at once, at least 50. 0: no cap. See [runs waiting](budgets-and-billing#how-many-runs-may-wait). |
 | `pods.search_max` | `FOLDRUN_SEARCH_MAX_PODS` | `3` | The most search pods one account's pool grows to. |
 | `pods.browser_max` | `FOLDRUN_BROWSER_MAX_PODS` | `4` | The most browser pods one account's pool grows to. |
 | `assistant.account_cap` | `FOLDRUN_ASSISTANT_ACCOUNT_CAP` | `3` | Assistant replies of one account running at once across every assistant pod. |
