@@ -385,13 +385,17 @@ is not a CA, or no certutil, leaves the old line: the engine does not trust
 the proxy's certificate. Tested with real Firefox and the platform's real
 egress CA (`foldrun-platform/tests/browse-firefox-ca.test.ts`, in CI).
 
-**WebKit, decided (Codex debate, 8 Nov 2026), not built.** Root must not
+**WebKit, decided (Codex debate, 8 Nov 2026), and built the same day** (foldrun-platform `src/egress-ca-trust.ts`). Root must not
 install a CA read from the job folder: it is the agent's (owned by it, kept
 by `--no-overwrite-dir`), so it is agent-writable input to root even though
 nothing runs as the agent before root's start today. Instead: the public CA
 as a platform-owned immutable ConfigMap; an init container from the same
 image validates it (one certificate, a CA) and builds the whole system store
-into an emptyDir, mounted read-only at `/etc/ssl/certs` in the run pod and
-the browse pod; root's start still reads nothing of the step's. Only for
-steps that get the CA today. The CA has no name constraints, so the trust
+into an emptyDir, mounted at `/etc/ssl/certs` in the run pod, owned by root
+(the agent cannot write it; root's apt can still regenerate it for a
+`runtime: system:` package — a read-only mount broke that, Codex review);
+root's start still reads nothing of the step's. Only for steps that get the
+CA today. The ConfigMap is named by the CA's key and subject, not its bytes
+(each process signs its copy again), and created, never applied over. The
+browse pod gets it when it serves Firefox and WebKit. The CA has no name constraints, so the trust
 is as wide as the proxy's key, which never leaves the proxy.
