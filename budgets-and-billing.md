@@ -139,10 +139,12 @@ or a `wait:` and waiting for a worker. A run asleep on its own `wait:` timer,
 at an approval gate or waiting for an event does not count, nor does a run
 that is running.
 
-- **The limit.** 20 for each run the account may drive at once (its own
-  `concurrency:`, or the install's), and never fewer than 50. The refusal
-  below names the number. An install sets one number for every account with
-  `FOLDRUN_MAX_WAITING_RUNS` (`0`: no limit).
+- **The limit.** On the hosted platform each plan sets its own number:
+  **Free 10, Starter 100, Pro 400, Scale 1,000**. Without a plan figure it is 20 for each run
+  the account may drive at once (its own `concurrency:`, or the install's),
+  and never fewer than 50. The refusal below names the number and where it
+  comes from. An install sets one number for every account with
+  `FOLDRUN_MAX_WAITING_RUNS` (`0`: no limit), which wins over the plan.
 - **Past it, a new run is refused at once** — never lined up and dropped
   later. A person or a key gets `409` with `code: "waiting_cap"`, `limit`
   and `waiting`, and the sentence: *this account already has 50 runs
@@ -330,8 +332,10 @@ provider's own invoice.
 | **vCPU** | per second, the cores a step reserves while it runs |
 | **RAM** | per second, the GiB a step reserves while it runs |
 | **step disk** | per second, the GiB of disk the step may write; deleted when the step ends |
-| **storage** | per GB-month, the files you keep between runs **over your plan's allowance**, accrued daily |
+| **storage** | per GB-month, the files you keep between runs **over your plan's allowance**, accrued daily. Only the GB above what your plan includes are charged (Free 2 GB, Starter 10, Pro 100, Scale 1 TB). It counts your workspaces' files and your run history, as they are now; a GB is 2^30 bytes |
 | **network** | per GB the sandbox moves, both directions |
+| **search and browser pods** | an account's search engine and its browser run as pods of their own. Each is charged like a step: the vCPU and GiB it holds, for the seconds it lives (idle time included, until it is let go), at the same vCPU and RAM rates, plus the GB it moves at the network rate. A search pod holds 1 vCPU and 0.75 GiB, a browser pod 2 vCPU, 3 GiB and 4 GiB of disk; each pod's requests equal its limits, so you are charged for exactly what is reserved for it. A pod session is not a run, so no minimum run charge applies |
+| **warm builds** | when you deploy, your workspace's environments (the packages an agent declares) are built ahead of its first step, in a short pod. **You pay for it**, because it is the work the first step would otherwise have done in its own sandbox: a small sandbox's vCPU and RAM for the seconds it ran, and the GB it downloaded. It is bounded (one build at a time, ten minutes at most) and shown as its own line, so it is never hidden in another |
 
 The rates are on the Usage page's **Rates** tab, in `foldrun usage rates`,
 in `GET /api/usage/rates` and, for anyone, in the public
@@ -339,7 +343,9 @@ in `GET /api/usage/rates` and, for anyone, in the public
 A default step (2 vCPU, 2 GiB) costs about 16 credits an hour. The Usage
 page's **Compute** tab shows each meter with its quantity, rate and credits,
 the plan fee as its own line, and what each step size costs per hour;
-`foldrun usage meters` prints the same.
+`foldrun usage meters` prints the same. The search pods, browser pods and
+warm builds each have a line with their pod-hours, sessions and the GB they
+moved; storage shows the GB held now against what your plan includes.
 
 There is deliberately **no per-step fee**. Steps are sandbox-seconds, so a
 step fee would charge compute twice and punish a well-factored flow for
