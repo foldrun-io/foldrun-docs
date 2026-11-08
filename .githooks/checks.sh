@@ -5,6 +5,7 @@
 # build goes to a temp dir so dist/ is left as it was.
 repo_checks() {
   step "no native browser controls" npx --no-install foldrun-ui-check-native src *.md
+  step "no raw HTML, script URLs or code from text (OWASP A03)" npx --no-install foldrun-ui-check-security src
   step "astro check" npx --no-install astro check
   step "astro build (to a temp dir) + every link lands" astro_build
 }

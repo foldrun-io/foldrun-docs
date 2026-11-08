@@ -5,6 +5,7 @@ name: ci
 # checked. Keep the two in step — checks.sh is the list.
 #
 #   check-native          no <details>/<select>/title= tooltips … (@foldrun/ui)
+#   check-security        no raw HTML, javascript: URLs or code from text (@foldrun/ui)
 #   astro check           types and content collections, blocking
 #   astro build           to a temp dir; the build Cloudflare Pages runs
 #   check-links           every page and #anchor a link inside the build names exists
@@ -78,6 +79,8 @@ jobs:
       - run: npm ci
       - name: no browser-native controls (@foldrun/ui check-native)
         run: npx --no-install foldrun-ui-check-native src *.md
+      - name: no raw HTML, script URLs or code from text (@foldrun/ui check-security, OWASP A03)
+        run: npx --no-install foldrun-ui-check-security src
       - run: npx --no-install astro check
       - name: astro build (to a temp dir)
         # Inside the checkout, not $RUNNER_TEMP: in a container job the two are
