@@ -63,14 +63,9 @@ cheapest, so stop after any of them if nobody asks for the next.
   FSL-1.1-ALv2 and the owner's own, so cloudhost needs a written commercial
   grant before it ships anything of ours inside its product (not needed if
   people simply install foldrun themselves).
-- Customers' prompts and code go to our servers outside Iran.
 
 ## To check, before step 1 is promised to anyone
 
-- Anthropic's terms for customers in Iran using Anthropic models or Claude Code
-  through our endpoints. **Not checked; the main risk.**
-- Whether customers can pay in toman, through cloudhost's wallet, or only in
-  dollars.
 - Each editor tool's exact setting for a custom endpoint. The list above was
   written from memory, not checked against their docs.
 - Whether cloudhost later wants its own address in front of the gateway; only
@@ -105,5 +100,8 @@ Decisions:
   gateway key, show the base URL and usage), CLI (`foldrun keys create
   --gateway`, `foldrun keys usage`), `api.md`, a docs page "Use Claude Code
   with foldrun", `openapi.ts`, surface-coverage entries.
-- **Still open:** Anthropic's terms for Iran (above) before this is promised
-  to anyone; the hostname (api.foldrun.io or a path on dev.foldrun.io).
+- **Hostname:** a path on the public host, `https://dev.foldrun.io/gateway`
+  (foldrun-infra public-ingress), so no new certificate or DNS name.
+- **Not for Iranian customers** (owner, 10 Nov 2026): foldrun does not sell
+  to them, so Anthropic's terms for Iran and toman payment are not
+  questions for this plan.
