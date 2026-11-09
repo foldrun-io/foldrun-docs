@@ -75,3 +75,35 @@ cheapest, so stop after any of them if nobody asks for the next.
   written from memory, not checked against their docs.
 - Whether cloudhost later wants its own address in front of the gateway; only
   if its customers ask.
+
+## Step 1 design (10 Nov 2026, owner's answers)
+
+Read from the code before writing any: the metering is `admitCall` in
+`foldrun-platform/src/model-gateway.ts` (route rule, standing, balance, price,
+held estimate, usage read from the stream), called today only by the egress
+proxy for a run's sandbox. The platform's Anthropic key is opened only in that
+process (`model-keys.ts supplyKey`); the web app only knows whether one is set.
+
+Decisions:
+
+- **Runs in the egress service, not in Next.** A new public listener there
+  serves `POST /v1/messages`, `POST /v1/messages/count_tokens` and
+  `GET /v1/models` (what Claude Code calls under `ANTHROPIC_BASE_URL`). It
+  reads the key from `x-api-key` or `Authorization: Bearer`, then runs
+  `admitCall` and forwards to api.anthropic.com with the platform key, so the
+  key never leaves that process. foldrun-infra routes a hostname to it.
+- **A new key purpose, `gateway`**, beside `a2a` (`api_keys.purpose`, plus a
+  nullable `gateway` jsonb grant: `{ capUsd, dailyUsd }`; expand-only
+  migration). It opens `/v1/*` on the gateway and no `/api` route
+  (`resolveTenant` refuses it, as for `a2a`); minted by an admin with
+  `POST /api/keys { purpose: "gateway", capUsd?, dailyUsd? }`.
+- **Limits:** the per-key cap is checked on top of the account balance and the
+  daily supply limit; usage rows carry `kind: "coding"` and the key id, so
+  usage is listed per key.
+- **Anthropic models only in v1** (no translation), as the ADR said.
+- **Layers still owed after the API:** dashboard (Settings → API keys: mint a
+  gateway key, show the base URL and usage), CLI (`foldrun keys create
+  --gateway`, `foldrun keys usage`), `api.md`, a docs page "Use Claude Code
+  with foldrun", `openapi.ts`, surface-coverage entries.
+- **Still open:** Anthropic's terms for Iran (above) before this is promised
+  to anyone; the hostname (api.foldrun.io or a path on dev.foldrun.io).

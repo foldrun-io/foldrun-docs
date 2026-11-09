@@ -45,7 +45,7 @@ export const GROUPS: DocGroup[] = [
   {
     title: "Start here",
     blurb: "What foldrun is, and from nothing to an agent running on your own machine.",
-    slugs: ["introduction", "getting-started", "how-it-works", "coding-agents", "mcp", "assistant"],
+    slugs: ["introduction", "getting-started", "how-it-works", "coding-agents", "claude-code", "mcp", "assistant"],
   },
   {
     title: "The format",
