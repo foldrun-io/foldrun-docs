@@ -12,13 +12,14 @@
     "dev": "astro dev --port 4340",
     "build": "astro build",
     "preview": "astro preview --port 4340",
-    "check": "foldrun-ui-check-native src *.md && astro check",
+    "check": "foldrun-ui-check-native src *.md && foldrun-ui-check-security src && astro check",
     "prepare": "(test ! -f .githooks/install.sh || sh .githooks/install.sh)"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
+    "@foldrun/ui": "https://codeload.github.com/foldrun-io/foldrun-ui/tar.gz/refs/tags/v0.3.2",
     "astro": "^7.2.9",
-    "@foldrun/ui": "github:foldrun-io/foldrun-ui#v0.2.1"
+    "github-slugger": "^2.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

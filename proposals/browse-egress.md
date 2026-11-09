@@ -122,7 +122,7 @@ the full runner image, as the browser pod does today.
 | Phase | Status | Shipped in |
 |---|---|---|
 | 1. Labels and admission | deployed on dev (v2026.11.02.2, 2 Nov); not yet clicked through — dev moved to AWS and has no account with an agent yet | core d684047, web 6f7f5fe, cli b215e07, docs 0ca9f0e |
-| 2. Browse service | built 5 Nov 2026 behind `FOLDRUN_BROWSE_SERVICE=1` (k8s only), off everywhere; for steps **not** held to their list (a held step keeps its browser in its walled pod, decision 2 as amended); Chromium and Chrome; vendors, live, Lightpanda/Obscura, Firefox/WebKit and extensions stay in the step — see *Phase 2 as built* | on main |
+| 2. Browse service | built 5 Nov 2026 behind `FOLDRUN_BROWSE_SERVICE=1` (k8s only); **on for dev since v2026.11.08.2** (infra 15b0ede, 8 Nov: a step's browse pod was made and answered on the cluster — a page through it not yet checked there), off elsewhere; for steps **not** held to their list (a held step keeps its browser in its walled pod, decision 2 as amended); Chromium and Chrome; vendors, live, Lightpanda/Obscura, Firefox/WebKit and extensions stay in the step — see *Phase 2 as built* | on main |
 | 3. Hosted enforcement | live on dev since v2026.11.05.3 (5 Nov 2026), `FOLDRUN_BROWSE_ENFORCE=1` (k8s only), in the browser-in-the-step shape below (owner accepted, 5 Nov); a held pod has no DNS since v2026.11.05.4; web search through the proxy's door (FOL-128, below) | core eead367, platform 4cc7432, infra 8699c66 + d9f7c49 |
 | 4. Vendors | planned | |
 
@@ -364,3 +364,38 @@ Owed: the service under a held list (it would make a held step's browser a
 separate pod, phase 3's "next step if wanted"), vendors through it with the
 public proxy door (phase 4), live sessions in it, Firefox and WebKit, and
 Chromium's own sandbox inside the pod (off, as in every runner today).
+
+## Firefox and WebKit trust of the egress CA (FOL-128, 8 Nov 2026)
+
+Tried in the runner image itself (v2026.11.08.2, Playwright 1.63, as the
+agent user), against an HTTPS server whose leaf a test CA signed and which
+sends the CA in its chain, as the proxy does:
+
+| Engine | Trusts the CA through | Does not |
+|---|---|---|
+| Chromium | `--ignore-certificate-errors-spki-list` (today's code; needs the CA in the served chain, which the proxy sends) | — |
+| Firefox | its profile's NSS database, filled with `certutil` (libnss3-tools) | the system store, `SSL_CERT_FILE`, `security.enterprise_roots.enabled`, a `distribution/policies.json` |
+| WebKit | the system store (`update-ca-certificates`, root) | `SSL_CERT_FILE`, `SSL_CERT_DIR`, a p11-kit user anchor, GnuTLS environment |
+
+**Firefox, as built.** The full image carries libnss3-tools. A held step
+asking for Firefox, outside the browse service, browses in a persistent
+context whose profile trusts the CA (`-t C,,`, one nickname): the session's
+own profile, or one made for the call and removed after. A certificate that
+is not a CA, or no certutil, leaves the old line: the engine does not trust
+the proxy's certificate. Tested with real Firefox and the platform's real
+egress CA (`foldrun-platform/tests/browse-firefox-ca.test.ts`, in CI).
+
+**WebKit, decided (Codex debate, 8 Nov 2026), and built the same day** (foldrun-platform `src/egress-ca-trust.ts`). Root must not
+install a CA read from the job folder: it is the agent's (owned by it, kept
+by `--no-overwrite-dir`), so it is agent-writable input to root even though
+nothing runs as the agent before root's start today. Instead: the public CA
+as a platform-owned immutable ConfigMap; an init container from the same
+image validates it (one certificate, a CA) and builds the whole system store
+into an emptyDir, mounted at `/etc/ssl/certs` in the run pod, owned by root
+(the agent cannot write it; root's apt can still regenerate it for a
+`runtime: system:` package — a read-only mount broke that, Codex review);
+root's start still reads nothing of the step's. Only for steps that get the
+CA today. The ConfigMap is named by the CA's key and subject, not its bytes
+(each process signs its copy again), and created, never applied over. The
+browse pod gets it when it serves Firefox and WebKit. The CA has no name constraints, so the trust
+is as wide as the proxy's key, which never leaves the proxy.

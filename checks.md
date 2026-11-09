@@ -81,7 +81,7 @@ listed with it. `deploy_block:` in `AGENTS.md` turns them into refusals:
 | `security` | any security finding: `secret/*`, `content/*`, `security/*`, `supply-chain/*`, and `flow/outward-ungated` (a step that acts outside with no check or approval) |
 
 Set it in the account's `AGENTS.md` for every workspace, or in one
-workspace's `AGENTS.md`, which wins. Settings → Governance → **Refuse a
+workspace's `AGENTS.md`, which wins. Settings → Policies → Governance → **Refuse a
 deploy on**, or `foldrun account set deploy_block secrets`. A refused
 deploy names each finding and its rule; a `foldrun-ignore` with a reason
 (below) still accepts one.
@@ -90,9 +90,9 @@ deploy names each finding and its rule; a `foldrun-ignore` with a reason
 
 `foldrun check` stays offline. Two checks need the network, so they run on
 the platform against the deployed copy: known vulnerabilities for exact
-runtime pins ([`supply-chain/known-vulnerability`](#supply-chainknown-vulnerability))
+runtime pins ([`supply-chain/known-vulnerability`](#supply-chain-known-vulnerability))
 and the tool text of MCP servers reached by URL
-([`content/mcp-tool-text`](#contentmcp-tool-text)).
+([`content/mcp-tool-text`](#content-mcp-tool-text)).
 
 - **When you ask:** Checks → **Online checks**, `foldrun check --to <ws>
   --online`, or `GET /api/workspaces/<ws>/check?online=1` — editor and
@@ -299,7 +299,7 @@ is the other answer, though this rule looks at the agent, not the flow.
 sub-agent never gets more than its parent, so they are dropped inside the
 delegation. Grant them to the parent, or remove them from the sub-agent.
 A sub-agent with `sandbox: own` is not this rule's: its tools are its own
-([below](#securitysubagent-own-sandbox)).
+([below](#security-subagent-own-sandbox)).
 
 ### security/subagent-own-sandbox
 
@@ -465,7 +465,7 @@ at `high`, Kimi has `low`, `high` and `max`, DeepSeek runs `medium` and
 `xhigh` as `high`. The step is not refused: it runs at the nearest level the
 model has, and its log says so, so a file stays valid when the account
 changes provider. Write a level the model has, or choose a provider whose
-model has the one you want (Settings → Model provider). Checked on the
+model has the one you want (Settings → Models). Checked on the
 platform (the Checks page, a save, a deploy) when the account runs on
 foldrun's models; `foldrun check` offline does not know the account's
 choice, and an agent or workspace with its own `provider:` is not checked.
