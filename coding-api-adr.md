@@ -147,9 +147,10 @@ Checked before writing:
 
 ### Part S — the gateway scales (first: everything else stands on it)
 
-Today each call makes 4–6 Postgres queries. One advisory lock per account
-serializes every model call of that account, runs included, and the spend
-sums grow with history. `model_usage` has no index on `job`, and the gateway
+Until 10 Nov 2026 each call made 4–6 Postgres queries. One advisory lock per
+account serialized every model call of that account, runs included, and the
+spend sums grew with history (fixed by the counter rows below).
+`model_usage` has no index on `job`, and the gateway
 shares the run proxy's egress pods.
 
 - **S1. Its own image and Deployment (owner, 10 Nov 2026).**
@@ -217,8 +218,47 @@ money held. The steps, each shippable alone:
   - a close delta applied to a counter rebuilt after the row closed;
   - a wipe between hold and insert.
 
-  Admission stays on the Postgres lock until the full design below is
-  built.
+  Superseded by the counter rows below.
+- **(e), built in Postgres (10 Nov 2026): running counters.** A table
+  `model_spend` holds one row per account and limit: the account's day
+  (list price), a gateway key's total and the key's day (charged, cost ×
+  margin).
+  - **Holding a call** is one conditional `UPDATE … SET usd = usd + hold
+    WHERE usd + hold <= cap` per limit. It runs in the same transaction as
+    the call's `model_usage` row. There is no lock over the account and no
+    sum of the day. Counters are taken in one order, so two calls never
+    deadlock.
+  - **Closing a call** moves its counters by what it cost minus its hold,
+    on the day it was held. It does this in the same transaction as the
+    row's close, with the row locked. A row already settled changes nothing.
+  - **A missing counter** is filled from the rows already there, in a
+    short transaction of its own under a per-account lock, and the hold is
+    tried again. So the deploy that adds the table needs no backfill, and a
+    fill never waits while holding a counter.
+  - **A close that finds no counter** leaves it to the fill. At worst a
+    counter made while a call was closing keeps that call's hold: more than
+    it cost, never less.
+  - **A guard trigger** on `model_usage` (migration 0047) covers any write
+    the counting code did not make: the previous release during a rollout
+    or after a rollback, or a hand-run fix. Such a write takes the same
+    per-account lock and clears that account's counters, and the next call
+    fills them again. So a fill and an old-release write cannot miss each
+    other.
+  - **Codex's review** (five passes) found eight problems, all fixed with
+    tests: a first call refused between two reads, a close during the first
+    fill, rounding drift, rows from before margins were stored, a hold's
+    margin not kept, a refusal dropping a filled counter, rollbacks, and an
+    old-release write racing a fill.
+  - **Measured** (16 workers, one account, local Postgres):
+
+    | Rows already in the day | Before: calls/s, median | After: calls/s, median |
+    |---|---|---|
+    | 50,000 | 96, 182 ms | 409, 37 ms |
+    | none | 396 | 406, 38 ms |
+
+    History no longer changes the cost of a call.
+  - Redis is still the next step if one account outgrows one row's update
+    rate.
 - **(e), the full design:** Redis counters with tenant hash-tagged keys and
   one validating Lua admission script, plus durable closes on each call's
   original day.
@@ -249,7 +289,10 @@ mapping (A5) applies first. Proven 10 Nov 2026: Claude Code sends any
     in Redis, else in the pod's memory.
   - **Core's Responses translator** now ends a failed or cut-off stream in
     an error.
-  - **Not yet:** A0 (a shared executor for runs too), A3, A4, A5, A6.
+  - **A5 built and live:** a gateway key's model map, through the API,
+    Settings → API keys, `foldrun keys set` and these docs.
+  - **Admission on counter rows** (Part S (e), built in Postgres).
+  - **Not yet:** A0 (a shared executor for runs too), A3, A4, A6.
 - **A0. One provider executor, used by the gateway and the run proxy (C).**
   It resolves the credential, admits, attempts, meters and translates, so
   multiple keys, failover and metering are written once for both paths.
