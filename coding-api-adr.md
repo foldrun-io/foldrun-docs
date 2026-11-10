@@ -209,8 +209,19 @@ money held. The steps, each shippable alone:
 - **(d)** Retry-stable call ids, plus durable batched admission and close in
   Postgres behind a flag: a call is sent only after its admission batch
   commits.
-- **(e)** Redis counters with tenant hash-tagged keys and one validating Lua
-  admission script, plus durable closes on each call's original day.
+- **(e) first attempt — parked (branch `s-e-redis-counters` in
+  foldrun-platform, not merged, 10 Nov 2026).** A Lua admission, an
+  in-flight set and counters rebuilt from Postgres. Its tests pass, but
+  Codex's review found races still open:
+  - a rebuild's snapshot against the in-flight handoff;
+  - a close delta applied to a counter rebuilt after the row closed;
+  - a wipe between hold and insert.
+
+  Admission stays on the Postgres lock until the full design below is
+  built.
+- **(e), the full design:** Redis counters with tenant hash-tagged keys and
+  one validating Lua admission script, plus durable closes on each call's
+  original day.
   - When Redis is down, admission is 503 (never `cache.ts`'s local fallback).
   - After a restart, an epoch fence rebuilds from Postgres.
   - Rollout: run in shadow, then switch whole accounts, runs included.
