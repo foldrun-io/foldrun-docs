@@ -152,9 +152,15 @@ serializes every model call of that account, runs included, and the spend
 sums grow with history. `model_usage` has no index on `job`, and the gateway
 shares the run proxy's egress pods.
 
-- **S1. Its own Deployment.** `foldrun-gateway` runs the same worker image
-  with a gateway-only entry point (`src/gateway.ts`, as `src/egress.ts` is
-  for the proxy).
+- **S1. Its own image and Deployment (owner, 10 Nov 2026).**
+  - **Image:** a slim `foldrun-gateway` image built from the same repos as a
+    separate target of the existing Dockerfile. It holds Node and the
+    gateway's modules only: less to attack on a public door, and faster to
+    pull when the HPA adds pods. A guard test fails when the gateway imports
+    something the image lacks.
+  - **Pipeline:** built, scanned, published and pinned by the same pipeline
+    (`images.sh`), so it is always the same version as the rest.
+  - **Entry point:** `src/gateway.ts`, as `src/egress.ts` is for the proxy.
   - Stateless, at least 2 replicas, with an HPA on CPU and open streams.
   - Drained on SIGTERM.
   - The `foldrun-gateway` Service and nginx `/gateway/` point at it.
