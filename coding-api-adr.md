@@ -374,6 +374,21 @@ already serves one (`/api/mcp`). Every MCP tool wraps an HTTP route.
     path traversal, escaping links or special files.
   - Or `{ git: { repo, ref } }` pinned to the resolved commit, with a
     repo-scoped credential.
+- **B3 design, debated with Codex (10 Nov 2026). The first slice to build:**
+  - **Where it lands:** a separate writable `/snapshot` in the run's sandbox, never under `/workspace`. All of `/workspace` is copied back after a run; nesting would tangle with copy-back, retries and recovery. The original manifest stays outside the agent's reach; the snapshot id is kept with the run, so a replaced worker can rebuild the baseline.
+  - **What comes back:** a git-compatible patch against the uploaded working tree, not git HEAD. It covers adds, deletes and the exec bit; renames are a delete plus an add. A change manifest gives each file's operation, before/after hashes and sizes. Binary changes are listed, not patched, in the first slice.
+    - A patch is never cut short to fit. If it is too big, the result says so.
+    - `result` stays small: answer, summary, completeness, artifact ids.
+    - `foldrun run diff <id>` prints the patch; `git apply --check` comes before applying. Later, `foldrun run apply` checks the baseline hashes itself.
+  - **Packing:** `git ls-files -z --cached --others --exclude-standard`, limited to the chosen folder; tracked files already deleted locally are skipped. Name exclusions (`.env*`, keys, credentials) apply to tracked files too. The archive is deterministic, for dedup.
+  - **Secrets:** core's scanner runs in an upload mode that repo comments cannot silence, on the exact bytes being packed. A finding refuses the upload; an explicit local override is the only way past. Files it cannot scan are reported. The local MCP tool reads only configured roots.
+  - **Upload:** `POST /api/workspaces/<ws>/snapshots` under a new `snapshot:write` permission (editor has it). Auth and the quota reservation come before the body is read.
+    - Limits: compressed 50 MB, unpacked 200 MB, 20k files, per-file size, path length and depth.
+    - Refused: absolute or `..` paths, links, devices, sparse entries, duplicates and file/directory clashes. Names are checked after PAX overrides.
+    - It is extracted fresh, normalised and hash-verified before it is published.
+  - **Storage:** records scoped to account and workspace; blobs in the tenant's content-addressed store. An id grants nothing. Unattached snapshots expire after 7 days; those attached to a run are pinned with its results; there are account quotas. GC is wired into the blob sweep.
+  - **Idempotency:** the upload and the run each take their own idempotency key, so a deduplicated upload can never start two paid runs.
+  - **The first slice:** git folders only, one snapshot per run, text patches. `run_agent` and `agent run` take `snapshot`; the local MCP gets `run_agent_on_folder`.
 - **B4. Spawn and results.**
   - `POST /api/workspaces/<ws>/spawn { task | tasks[], agent?, model?,
     size?, snapshot | git, grants? }` returns run ids.
