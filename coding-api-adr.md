@@ -240,6 +240,16 @@ prefix (`claude-`, `gpt-`, `gemini-`, `deepseek-`, `kimi-`). The key's own
 mapping (A5) applies first. Proven 10 Nov 2026: Claude Code sends any
 `--model` name unchanged (`/v1/messages?beta=true model=openai/gpt-6`).
 
+- **Status (10 Nov 2026):**
+  - **A1 and A2 built and proven** with real Claude Code against recording
+    fakes, tool loops included. Calls are chosen by model name: DeepSeek and
+    Kimi as they are; OpenAI (Responses) and Gemini (Chat Completions)
+    through core's translator.
+  - **Gemini's thought signatures** are kept per account and per call (2 h)
+    in Redis, else in the pod's memory.
+  - **Core's Responses translator** now ends a failed or cut-off stream in
+    an error.
+  - **Not yet:** A0 (a shared executor for runs too), A3, A4, A5, A6.
 - **A0. One provider executor, used by the gateway and the run proxy (C).**
   It resolves the credential, admits, attempts, meters and translates, so
   multiple keys, failover and metering are written once for both paths.
