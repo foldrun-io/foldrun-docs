@@ -105,3 +105,241 @@ Decisions:
 - **Not for Iranian customers** (owner, 10 Nov 2026): foldrun does not sell
   to them, so Anthropic's terms for Iran and toman payment are not
   questions for this plan.
+
+## Shipped in step 1 (10 Nov 2026, live on dev v2026.11.09.3)
+
+The gateway door (`foldrun-platform/src/gateway-door.ts`) on the egress pods
+behind `https://dev.foldrun.io/gateway`; gateway keys (`purpose: "gateway"`)
+on foldrun's models with per-key limits in dollars charged, each call kept at
+its own margin (`model_usage.margin`); login keys (`credential: "login"`) on
+the operator's own Claude login for the operator's own accounts. Proven with
+real Claude Code on dev on a login key. Not proven on dev: a metered key
+against real providers (dev has foldrun's models off and no provider keys).
+
+## Plan: a gateway that scales, every model behind one key, subagents on foldrun's pods (10 Nov 2026)
+
+The owner's asks, in one plan:
+1. The LLM gateway scales.
+2. One foldrun key reaches any provider's models, chosen by the caller.
+3. Claude Code on a laptop hands work to agents in foldrun's pods and gets
+   their answers back. That works from the HTTP API, MCP and the CLI alike.
+
+Claude Code and the Agent SDK are not changed. Everything is server-side,
+reached the ways Claude Code already supports: an Anthropic base URL, and
+MCP.
+
+Not in this plan: foldrun signing in to several consumer subscriptions and
+serving them to customers. That resells consumer plans, which the providers'
+terms forbid (cloudhost's D152 reached the same conclusion), and it risks
+the subscription the desks run on. Customers get foldrun's models on API
+keys, resold at margin, which is allowed, and may connect their own keys.
+
+Checked before writing:
+- **Industry gateways** keep the database off the per-call path.
+  - LiteLLM batches spend writes (60 s; a Redis buffer above ~1k rps).
+  - Envoy AI Gateway runs a stateless proxy with a Redis rate-limit service.
+  - Cloudflare, Portkey and Helicone enforce budgets and rate limits from
+    shared fast state.
+- **cloudhost's own proxy design (D152)** is stateless, keeps limits in
+  memory and meters in batches.
+- **Codex's design debate** made 15 points. The large ones were checked in
+  the code and are folded in below, marked (C).
+
+### Part S — the gateway scales (first: everything else stands on it)
+
+Today each call makes 4–6 Postgres queries. One advisory lock per account
+serializes every model call of that account, runs included, and the spend
+sums grow with history. `model_usage` has no index on `job`, and the gateway
+shares the run proxy's egress pods.
+
+- **S1. Its own Deployment.** `foldrun-gateway` runs the same worker image
+  with a gateway-only entry point (`src/gateway.ts`, as `src/egress.ts` is
+  for the proxy).
+  - Stateless, at least 2 replicas, with an HPA on CPU and open streams.
+  - Drained on SIGTERM.
+  - The `foldrun-gateway` Service and nginx `/gateway/` point at it.
+  - Runs and coding traffic can no longer starve each other.
+  - Language stays TypeScript. The work is network-bound, and a rewrite
+    would duplicate the metering, price rules and translator that runs use.
+    Load-test before reconsidering.
+- **S2. Spend, limits and rate limits in Redis.** One atomic script per call
+  holds the estimate against:
+  - the account's day,
+  - the key's cap and day,
+  - the key's requests per minute,
+  - the account's wallet hold.
+
+  The script refuses with which limit has no room. Closing a call adjusts
+  each counter by actual minus estimate. No Postgres lock.
+- **S3. Wallet holds in chunks (C: today admission only checks balance > 0).**
+  - The gateway takes credit from the wallet into Redis a chunk at a time,
+    and returns the unused part. Calls hold against that chunk.
+  - Postgres is written once per chunk, never per call.
+  - Overspend is impossible however many calls run at once.
+  - Run compute uses the same holds.
+- **S4. Usage rows in batches.** `model_usage` rows are queued and written
+  in batches; a crash replays the queue, idempotent by call id. Settlement
+  and the ledger are unchanged. Limits never read Postgres sums again, and
+  history no longer slows anything.
+- **S5. Key lookups cached** for ~10 s per pod. A revocation is published
+  on Redis and drops the key at once. "Last used" is written in batches.
+- **S6. Measured.** Prometheus counters for streams, held dollars, refusals
+  by limit and batch lag. A load test sets each pod's open-stream budget and
+  the HPA target from numbers.
+
+### Part A — the gateway reaches every provider
+
+**Routing.** A provider is chosen by the model name in each request:
+`provider/model` always (`openai/gpt-6`), or a bare name with a known
+prefix (`claude-`, `gpt-`, `gemini-`, `deepseek-`, `kimi-`). The key's own
+mapping (A5) applies first. Proven 10 Nov 2026: Claude Code sends any
+`--model` name unchanged (`/v1/messages?beta=true model=openai/gpt-6`).
+
+- **A0. One provider executor, used by the gateway and the run proxy (C).**
+  It resolves the credential, admits, attempts, meters and translates, so
+  multiple keys, failover and metering are written once for both paths.
+- **A1. Anthropic-format providers (DeepSeek, Kimi).** Requests go to their
+  `/anthropic/v1/messages` with `shapeRequest`, as runs do, and are metered
+  per provider. No translation.
+- **A2. Translated providers (OpenAI Responses, Gemini Chat Completions).**
+  Uses core's pure converters and stream translators, not the localhost
+  server. Metering reads the provider's own format.
+  - Before going public, fix two things (C):
+    - an OpenAI `response.failed` becomes an Anthropic error, not a normal
+      end;
+    - Gemini's thought signatures survive between separate calls, kept in
+      authenticated tool-call ids or a tenant-scoped Redis entry, never a
+      global cache.
+  - Prove, for each model offered, tool discovery and a full multi-turn
+    tool loop. Deferred MCP tools are dropped today, which would break
+    Part B (C).
+  - The docs say what is lost:
+    - prompt caching;
+    - thinking, where the provider has none;
+    - server tools;
+    - Claude Code's cost and context display for non-Claude models.
+- **A3. Several platform keys per provider, with failover (after S and A0).**
+  - Keys gain a slot and a quota group; one expand-only migration that
+    keeps old readers working.
+  - Refusals are classed as transient rate limits, exhausted quota or dead
+    credentials. Cooldowns are kept in Redis, across replicas.
+  - A call is retried on a key in another quota group only before any
+    output has gone out, within a capped time.
+  - One request has several recorded attempts under one held budget, so a
+    retried success is never free (C).
+- **A4. The account's own provider keys.** Kept in the vault.
+  - The account sets the order of sources (own first, or foldrun's first);
+    falling back to platform credit is opt-in.
+  - The source is recorded per attempt. Own-key tokens are recorded, not
+    billed (pod compute still is).
+  - Login keys stay Claude-only.
+- **A5. Per-key model mapping.** `models: { opus?, sonnet?, haiku? }` in
+  the key's grant (no migration). The gateway rewrites the model before
+  routing, so the `/model` picker reaches any provider with no client
+  settings.
+  - Only priced, offered models are accepted, resolved through one catalog.
+  - API: set at mint, and by a PATCH on the key.
+  - Dashboard: the key row shows what each tier really runs on.
+  - CLI: `foldrun keys set <id> --sonnet openai/gpt-6`, shown in `keys ls`.
+- **A6. The other routes.**
+  - `/v1/models` lists every priced, offered model.
+  - `count_tokens` for a non-Anthropic model returns an estimate, marked as
+    one.
+
+### Part B — subagents on foldrun's pods (API first; MCP and CLI over it)
+
+Claude Code's own subagents always run locally; its docs offer
+`isolation: worktree` only. MCP is the supported way out, and foldrun
+already serves one (`/api/mcp`). Every MCP tool wraps an HTTP route.
+
+- **B1. A job contract, before code (C).**
+  - Spawning returns a durable receipt at once. Results are read, never
+    waited on over one HTTP request: MCP waits stop at 900 s and buffer
+    whole replies.
+  - A waiter disconnecting never cancels the job; stop is explicit.
+  - Each child has an idempotency token, and a fan-out reports partial
+    admission.
+- **B2. Isolation by default (C).**
+  - A spawned pod gets no account secrets, integrations or workspace
+    context unless the request grants them by name.
+  - Its network is the intersection of the workspace's list and the
+    request's.
+  - Uploaded files can never widen what the agent may do.
+  - Spawned agents cannot spawn more (no recursion).
+- **B3. Code in, as an immutable snapshot.**
+  - The CLI (or a small local MCP helper — a remote MCP tool cannot read the
+    laptop) packs the folder and uploads it under a narrow `snapshot:write`
+    permission, not `workspace:write` (C).
+  - Excluded by default: `.env`, credentials, `.git`, dependency and build
+    folders.
+  - Checks: size, file count and unpacked size limits; digest verified; no
+    path traversal, escaping links or special files.
+  - Or `{ git: { repo, ref } }` pinned to the resolved commit, with a
+    repo-scoped credential.
+- **B4. Spawn and results.**
+  - `POST /api/workspaces/<ws>/spawn { task | tasks[], agent?, model?,
+    size?, snapshot | git, grants? }` returns run ids.
+  - `GET …/runs/<id>/result` → `{ status, answer, artifacts: [{ id, kind:
+    "patch", digest, baseline }], cost }`.
+  - The patch is made outside the agent's control: the final tree against
+    the immutable baseline, including new, deleted and binary files.
+  - Results are stored artifacts with a digest, never inline text; MCP cuts
+    replies at 100,000 characters (C).
+  - The default agent is a built-in coding agent that the account can
+    override with its own.
+- **B5. Limits.** For each fan-out:
+  - its spend, from S3's holds;
+  - the number of children;
+  - queue length and TTL;
+  - runtime, disk and output size.
+
+  Pod concurrency is held by room-wait as today.
+- **B6. MCP tools:**
+  - `spawn_agent`, `spawn_agents` and `agent_result` (with a short bounded
+    poll, a cursor and a retry hint);
+  - status, message and stop use the existing run routes.
+- **B7. CLI.** `foldrun spawn "<task>" [--code .|--git repo@ref] [--model m]
+  [--size s] [--wait] [--apply]`. `--apply` verifies the baseline and
+  applies the patch in a separate local worktree. `--tasks file` fans out.
+- **B8. Claude Code wiring.** `foldrun guide` (and `init`) writes
+  `.claude/agents/foldrun.md`, a subagent whose `mcpServers:` names
+  foldrun's MCP and whose prompt says when to hand work over. The docs give
+  the one `claude mcp add --transport http foldrun …` line.
+- **B9. Dashboard.** Spawned runs are marked on the Runs page, with the
+  patch to view and download and their pod cost.
+
+### Order, and how each part ships
+
+1. **S1–S6.** The gateway scales.
+2. **A0 → A1 → A2 → A5 → A6.** Every provider, one key.
+3. **B, as one slice.** The job contract, isolation, snapshot upload,
+   spawn, result, download and stop. Then MCP and the Claude Code wiring,
+   then fan-out and the dashboard.
+
+   B can run in parallel with A, because its pods' agents use the platform's
+   model supply already.
+4. **A3, then A4.** Once attempt accounting and source policy are in place.
+
+Each part ships the same way:
+- a Codex design debate first;
+- API → dashboard → CLI → docs;
+- tests with fake providers, plus real Claude Code on the test VM
+  (`ssh foldrun-cc`);
+- Codex review until clean;
+- the owner sees UI before a push;
+- the manual deploy recipe.
+
+Proving real providers on dev needs the operator:
+- provider keys in the console;
+- their price list entries;
+- `models.supply.enabled`;
+- an account allowed foldrun's models.
+
+Until then the proof is real Claude Code against recording fakes.
+
+Risks:
+- Non-Claude models may do noticeably worse in long agentic sessions.
+- DeepSeek keeps data in China (its privacy policy).
+- Providers' rate limits reach the caller.
+- Dev is one small node: autoscaling only fills it, and real scale needs
+  the prod cluster's autoscaling nodes.
