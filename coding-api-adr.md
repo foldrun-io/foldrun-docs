@@ -193,6 +193,34 @@ shares the run proxy's egress pods.
   by limit and batch lag. A load test sets each pod's open-stream budget and
   the HPA target from numbers.
 
+**Part S, as built (Codex design debate, 10 Nov 2026, findings checked in the code).**
+Redis may be wiped (`cache.ts` allows it), so it is never the only record of
+money held. The steps, each shippable alone:
+
+- **(a)** The `(tenant, job, day)` index on `model_usage` (0045), and the
+  gateway's duplicate spend pre-check removed: the reservation alone refuses.
+  — done.
+- **(b)** Its own image (`--target gateway`) and Deployment
+  (`components/gateway`), with today's accounting. Pipeline: built, scanned,
+  published, reused and pinned like the rest. The egress pods no longer
+  serve it. Rollout, drain and rollback exercised. — built.
+- **(c)** Cached key lookups (≤ 10 s staleness, expiry checked per call), and
+  per-key rate and concurrency limits on every route, login keys included.
+- **(d)** Retry-stable call ids, plus durable batched admission and close in
+  Postgres behind a flag: a call is sent only after its admission batch
+  commits.
+- **(e)** Redis counters with tenant hash-tagged keys and one validating Lua
+  admission script, plus durable closes on each call's original day.
+  - When Redis is down, admission is 503 (never `cache.ts`'s local fallback).
+  - After a restart, an epoch fence rebuilds from Postgres.
+  - Rollout: run in shadow, then switch whole accounts, runs included.
+- **(f)** Wallet chunks as billing-owned reservations through `billing()`.
+  The posted ledger charge releases the reservation in the same transaction,
+  and run admission joins the same money rule.
+  - "Overspend impossible" was too strong: the estimate is not a proven
+    upper bound, so the guarantee is bounded exposure. A call that runs over
+    its estimate is recorded in full, admission stops and an alert fires.
+
 ### Part A — the gateway reaches every provider
 
 **Routing.** A provider is chosen by the model name in each request:
