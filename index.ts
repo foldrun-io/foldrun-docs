@@ -59,7 +59,7 @@ export const GROUPS: DocGroup[] = [
     blurb:
       "What happens once it runs: schedules, the run record, approvals, what it " +
       "costs, where the files go, and who gets told.",
-    slugs: ["scheduling", "runs", "harness", "budgets-and-billing", "storage-and-sharing", "notifications", "secrets", "oauth", "network", "a2a"],
+    slugs: ["scheduling", "runs", "harness", "budgets-and-billing", "storage-and-sharing", "extract", "notifications", "secrets", "oauth", "network", "a2a"],
   },
   {
     title: "Your account",
