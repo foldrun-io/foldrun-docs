@@ -1463,8 +1463,18 @@ is on the secret itself. `check` refuses `state` beside `cookies` without
 
 ### Where the browser runs
 
+On a cluster, a browsing step's browser is chosen in this order
+(`run-k8s.ts`, the worker's step services):
+
+| The step | Its browser |
+|---|---|
+| held to its `network:` list | Chromium inside its own run pod, walled to the egress proxy |
+| not held, with `FOLDRUN_BROWSE_SERVICE=1` | a [browse-service pod](network#the-browse-service) of its own, deleted with the step |
+| names a vendor (`web: {browse: browserbase}`) | the vendor's browser; no pod of ours |
+| anything else | the account's browser pods, below |
+
 Locally — the CLI, a compose install — Chromium launches inside the step,
-and always did. On a cluster it runs in **the account's own browser pods**:
+and always did. Otherwise, on a cluster, it runs in **the account's own browser pods**:
 Playwright servers on the runner image (Playwright pinned to an exact
 version, 1.63.0, in `run-container.ts` — the numbered snapshot needs 1.59
 or later, and a floating `@1` would move the pods and the tool under a

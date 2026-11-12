@@ -152,8 +152,11 @@ What ships:
   vendor: none is qualified yet), with the per-agent opt-out of decision 4
   (`network: open` on that agent) named — the one place the advice mentions
   open. Off the switch, an open list or a report-only one: exactly as before.
-- **Platform**: no account browser pod (nor search pod) for a held step, said
-  in the trace; a resumed sandbox's own label is read and the trace says when
+- **Platform**: no account browser pod for a held step, said in the trace.
+  The account's search pod is still started for it, and reached through the
+  egress proxy's search door (see *Web search under a held list*, below —
+  this line said "nor search pod" until 12 Nov 2026, which the code never
+  did after FOL-128); a resumed sandbox's own label is read and the trace says when
   its wall differs from what the driver would build now.
 - **The web tool's browse program**: the forward door as launch options
   (`proxy: {server, username, password}`, loopback bypassed) — Playwright
