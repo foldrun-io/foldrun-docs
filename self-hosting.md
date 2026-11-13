@@ -317,19 +317,19 @@ node --experimental-strip-types scripts/vault-fleet.ts export [--tenant a,b]
 **The way back from the mirror being off.** The files are stale, so they must
 not be read until they are brought up to date:
 
-1. `vault-fleet.ts export`, then `verify`: it is clean when every file equals
-   its row.
-2. Turn `secrets.mirror` on.
+1. Turn `secrets.mirror` on: from then on every change also reaches its file.
+2. `vault-fleet.ts export`, then `verify`: export writes each row as it is
+   when the file's lock is held, so a change made during the export is not
+   lost; `verify` is clean when every file equals its row.
 3. Only then, if you want the files back as the vault, turn `secrets.store`
    off.
 
 The platform holds you to this order. `secrets.store` cannot be turned off
 while `secrets.mirror` is off (the change is refused, naming the export), and a
 process whose setting says the store is off while the mirror is off still reads
-the rows as long as any row exists, and logs `vault.store_held_by_rows`. A
-change between the export and turning the mirror on is the one thing the order
-cannot catch: export again if a secret was saved in between, or do both in a
-quiet minute.
+the rows as long as any row exists, and logs `vault.store_held_by_rows`. With the
+mirror on before the export, a change made while it runs reaches the file
+either way: through the mirror, or through the export reading the row again.
 
 Turning `secrets.store` off with the mirror on needs no copying: the files are
 current. A scope with a file and no row is read from the file again; one with a
