@@ -224,6 +224,8 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_S3_ENDPOINT`, `FOLDRUN_S3_BUCKET`, `FOLDRUN_S3_REGION`, `FOLDRUN_S3_ACCESS_KEY_ID`, `FOLDRUN_S3_SECRET_ACCESS_KEY`, `FOLDRUN_S3_PATH_STYLE` | the bucket |
 | `FOLDRUN_STORAGE_MAX_MB` | one object, default 512 |
 | `FOLDRUN_STORAGE_QUOTA_MB` | one workspace, default 5120 |
+| `FOLDRUN_DATA_LOCAL` | `1`: this pod's data root is its own disk (an emptyDir), not a volume every pod shares. A folder missing or older than the revision heads there is then never taken as the truth: the reconcile publishes nothing from it, the orphan sweep removes no history, and the journal recovery removes no other pod's entry. Every storage switch must stay on — `revisions.journal`, `revisions.read`, `revisions.mirror`, `records.docs_store`, `runs.step_state_store`, `runs.calls_store`, `runs.runtime_store`, `runs.outputs_store`, `secrets.store`: a pod with one off logs `storage.local_disk_switch_off` each time the set changes, and a settings change that turns one off is refused |
+| `FOLDRUN_FLEET_DATA_LOCAL` | `1` on the console (which writes the settings and keeps no data root) when the fleet's pods are `FOLDRUN_DATA_LOCAL=1`: it refuses turning a storage switch off the same way |
 
 ## Data services (optional)
 
