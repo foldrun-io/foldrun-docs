@@ -4,9 +4,8 @@
 // build — so every link out of them is cross-origin: the marketing pages, the
 // dashboard, and back. Hardcoding would mean a staging build advertises
 // production; reading the environment means one variable decides, and the
-// default — written once, here — is what production will be. The dashboard
-// is dash.foldrun.io in production; until then the Pages project sets
-// PUBLIC_APP_URL=https://dev.foldrun.io.
+// default — written once, here — is production: dash.foldrun.io (the Pages
+// project sets the same since 13 Nov 2026).
 
 export const DOCS_URL = import.meta.env.PUBLIC_DOCS_URL ?? "https://docs.foldrun.io";
 export const SITE_URL = import.meta.env.PUBLIC_SITE_URL ?? "https://foldrun.io";
@@ -20,7 +19,7 @@ export const signUp = `${APP_URL}/signup`;
 /** GET <app>/api/signup: whether sign-up is open; buttons marked signup follow it. */
 export const SIGNUP_API = `${APP_URL}/api/signup`;
 /** The platform's status, for the footer's dot. */
-export const STATUS_API = import.meta.env.PUBLIC_STATUS_API ?? "https://dev.foldrun.io/api/status";
+export const STATUS_API = import.meta.env.PUBLIC_STATUS_API ?? `${APP_URL}/api/status`;
 export const CONTACT = "hello@foldrun.io";
 
 /** The header: a few doc entry points, then the way back to foldrun.io. */

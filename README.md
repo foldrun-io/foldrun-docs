@@ -57,8 +57,8 @@ is written once, in `src/lib/site.ts`.
 |---|---|---|
 | `PUBLIC_DOCS_URL` | this site's own origin — canonical URLs, the sitemap | `https://docs.foldrun.io` |
 | `PUBLIC_SITE_URL` | foldrun.io, for the links back | `https://foldrun.io` |
-| `PUBLIC_APP_URL` | the dashboard: Sign in, Get started, the sign-up switches | `https://dash.foldrun.io` (production sets `https://dev.foldrun.io` until dash exists) |
-| `PUBLIC_STATUS_API` | the footer's status dot | `https://dev.foldrun.io/api/status` |
+| `PUBLIC_APP_URL` | the dashboard: Sign in, Get started, the sign-up switches | `https://dash.foldrun.io` (the Pages project sets the same since 13 Nov 2026) |
+| `PUBLIC_STATUS_API` | the footer's status dot | `<PUBLIC_APP_URL>/api/status` |
 
 ## Git hooks
 
