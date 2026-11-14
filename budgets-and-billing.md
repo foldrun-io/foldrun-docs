@@ -579,6 +579,16 @@ account filled in, wherever foldrun.ir is selling.
    within a day of the order; later than that the platform team credits it
    by hand (Zarinpal returns a payment nobody verified within 72 hours).
 
+No account yet? When the address typed has no foldrun account, foldrun.ir
+offers to make one: foldrun (not foldrun.ir) mails that address a sign-up
+link. Opening it shows foldrun's own sign-up page with the address filled in
+— choose an account name and a password — and the account starts with the
+address already confirmed. It works even while sign-up is otherwise closed,
+for that one address, for seven days. Then foldrun sends the person back to
+foldrun.ir's charge page with the address filled in, to pay. foldrun.ir never
+sees the password or a session: signing in, API keys and everything else
+happen here.
+
 The credit is bought credit like any other: it expires 12 months after
 purchase if unused. The platform operator sets, in the console's Settings
 under Billing:
