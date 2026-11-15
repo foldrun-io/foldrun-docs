@@ -134,7 +134,7 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_SETUP_TOKEN` | when set, the install's first account (its owner) can be created only with it: `/signup?setup=<token>`. The self-hosting installer writes one to `.env` and prints that link, so another user of the same machine cannot sign up first. Unset, the first signup is free; once any account exists it does nothing |
 | `FOLDRUN_MULTI_TENANT` | `1` on any install that will serve more than one account — refuses to run without step isolation |
 | `FOLDRUN_EDITION` | `hosted` or `self-hosted`, said outright. An install built from the public repositories is always `self-hosted`: it has no billing pages or operator console to turn on |
-| `FOLDRUN_VERSION` | the version `/api/healthz` and the dashboard report (default `dev`); set by the image build |
+| `FOLDRUN_VERSION` | the version `/api/version`, `/api/healthz` and the dashboard report (default `dev`); set by the image build |
 | `FOLDRUN_ACCOUNT` | the account folder, for a program that embeds foldrun and knows where its account is. Beats the usual search upward from the working directory |
 | `FOLDRUN_LOG_MODE` | `raw` keeps a server process out of the [log boundary](security#what-our-telemetry-carries): its logs then print errors in full, account content included. Unset: every hosted process (web under `next start`, worker, egress, assistant) writes only shaped ops lines; `next dev` is always raw. For your own machine when debugging; foldrun's manifests never set it, and infra's tests refuse it |
 
@@ -285,7 +285,7 @@ self-hosted install reads the variable as before.
 
 | variable | |
 |---|---|
-| `FOLDRUN_METRICS_TOKEN` | the bearer a scraper presents to `/api/metrics` |
+| `FOLDRUN_METRICS_TOKEN` | the bearer a scraper presents to `/api/metrics`; it also reads the detail of `/api/healthz` and `/api/version` that a stranger does not get (the database, Redis and worker flags, the commit shas). The self-hosting installer writes one |
 | `FOLDRUN_OPS_OTLP_URL` | where the worker sends each finished run's **ops trace** — the platform's own, OTLP/HTTP JSON (`…/v1/traces`; http or https, redirects refused): its funnel from submitted to finished, one span per stage, with ops-log fields only ([what it carries](security#what-our-telemetry-carries)). Unset: none is sent. Needs a database (the trace is sent once, from the run's wide event, and retried by the hourly pass up to five times). Unset on the hosted platform today. Not an account's `telemetry:` |
 | `FOLDRUN_OPS_OTLP_TOKEN` | a bearer token sent with the ops trace, when the collector wants one |
 | `FOLDRUN_CSP` | `report-only` sends the dashboard's Content-Security-Policy as `Content-Security-Policy-Report-Only`: violations are reported in the browser, not blocked. Unset: enforced (since 28 Oct 2026). A way back while you find what a page needs, not a setting to leave on |
