@@ -53,7 +53,7 @@ markdown: no browser-native controls.
 CI's `visual` job builds the site and photographs key pages
 (`visual/docs.spec.mjs`: light, dark and a phone width) in Microsoft's
 Playwright image, comparing each with `visual/baselines/<page>-<project>.png`.
-More than 0.2% of the pixels different fails the run, and the `visual`
+More than 100 pixels different fails the run, and the `visual`
 artifact holds `<page>-actual.png`, `-expected.png` and `-diff.png` (the
 changed pixels in red). `bash scripts/visual.sh <built-site-dir>` runs the
 same compare locally (Docker; it copies files in, so Colima on a Mac works).

@@ -12,8 +12,12 @@ export default defineConfig({
   workers: 2,
   retries: 0,
   reporter: [["list"]],
+  // maxDiffPixels is a fixed number, not a share of the page: CI shoots in
+  // the same Playwright image every time, so an unchanged page differs by a
+  // few anti-aliased pixels at most, while a share grows with a full-page
+  // shot (0.2% of the kit demo hid a letter-spacing change on every heading).
   expect: {
-    toHaveScreenshot: { maxDiffPixelRatio: 0.002, threshold: 0.2, animations: "disabled", caret: "hide", scale: "css" },
+    toHaveScreenshot: { maxDiffPixels: 100, threshold: 0.2, animations: "disabled", caret: "hide", scale: "css" },
   },
   webServer: { command: "node serve.mjs", url: "http://127.0.0.1:4399/", reuseExistingServer: false },
   use: { baseURL: "http://127.0.0.1:4399", locale: "en-US", timezoneId: "UTC", reducedMotion: "reduce", deviceScaleFactor: 1 },
