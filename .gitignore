@@ -5,3 +5,5 @@ dist/
 
 # SBOMs the security gate writes (.githooks/security.sh); CI keeps them as artifacts
 sbom/
+visual-report/
+.visual-site/

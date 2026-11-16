@@ -48,6 +48,24 @@ next). A change to the look is a change in foldrun-ui, then a new tag here.
 `npm run check` also runs `foldrun-ui-check-native` over `src/` and the
 markdown: no browser-native controls.
 
+## Visual baselines
+
+CI's `visual` job builds the site and photographs key pages
+(`visual/docs.spec.mjs`: light, dark and a phone width) in Microsoft's
+Playwright image, comparing each with `visual/baselines/<page>-<project>.png`.
+More than 0.2% of the pixels different fails the run, and the `visual`
+artifact holds `<page>-actual.png`, `-expected.png` and `-diff.png` (the
+changed pixels in red). `bash scripts/visual.sh <built-site-dir>` runs the
+same compare locally (Docker; it copies files in, so Colima on a Mac works).
+
+Baselines are made by CI on Linux, never on a laptop (fonts render
+differently). **A change meant to change a page updates its baselines in the
+same pull request:** push the branch; Actions → ci → Run workflow on it, with
+"update the visual baselines" ticked; then
+`GH_TOKEN=… bash scripts/visual-baselines.sh <that run's id>`, look at the
+pictures, and commit them with the change. A missing baseline fails the
+compare; it is never written silently.
+
 ## Environment
 
 Set at the host (the Cloudflare Pages project), never committed. Each default
