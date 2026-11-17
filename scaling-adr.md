@@ -39,13 +39,13 @@ exists).
   This is why the answer is Postgres and not a broker.
 - Workers × N, stateless web × N, scheduler behind a pg advisory lock.
 - storage/ stays R2 (already true). Secrets → KMS-backed.
-- Workspace SOURCE (the markdown) can stay file/git-shaped — it is the
+- Project SOURCE (the markdown) can stay file/git-shaped — it is the
   product's identity; runs/money/jobs are what outgrow files.
 
 ## The seams (why this is a re-plumb, not a rewrite)
 
 All state I/O already routes through three modules:
-- `store.ts` — run records and workspace reads
+- `store.ts` — run records and project reads
 - `ledger.ts` — every dollar
 - `queue.ts` — every job
 
@@ -61,9 +61,9 @@ grammar, not the runner's semantics, not the UI.
   another pod holds alone — so worker pods scale out behind an HPA once the
   data volume is shared (EFS).
 - The scheduler ticks from memory. One lease holder (Redis when there is
-  one), a full rescan every `FOLDRUN_SCHEDULE_RESCAN_MS`, and a workspace
+  one), a full rescan every `FOLDRUN_SCHEDULE_RESCAN_MS`, and a project
   re-read only when the platform is told it changed — the tick never walks
-  every workspace on a shared filesystem.
+  every project on a shared filesystem.
 - Backups are only backups once they're off the box (R2 `backups/`,
   14-day rotation local, 15-day remote).
 - /api/metrics is the tripwire: alert on `foldrun_queue_oldest_pending_seconds`

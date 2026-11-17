@@ -54,7 +54,7 @@ Code: `foldrun-web/server/api-version.ts` and `apiGate` in `server/api-limits.ts
 - **CLI newer than the platform** (a self-hosted box or staging behind npm): every command
   stops with exit 1. It names the CLI released with that platform (from `X-Foldrun-Cli`).
   `foldrun version` asks with no header, so it still shows the platform and warns.
-  Before 18 Oct 2026, `foldrun workspaces` printed "no workspaces" with exit 0 in this case.
+  Before 18 Oct 2026, `foldrun workspaces` printed "no projects" with exit 0 in this case.
 - **Bumping the CLI's `API_VERSION`** is a release of the CLI that needs a platform
   answering that date. Ship the platform first, then the CLI.
 

@@ -8,7 +8,7 @@ things that are not a storage problem at all.
 
 **Markdown for what people author. Postgres for what the system accumulates.**
 
-Workspaces, agents, flows, skills and knowledge stay files. They are the
+Projects, agents, flows, skills and knowledge stay files. They are the
 product's identity and the reason to choose it. Runs, money, jobs, identity and
 audit are records, not documents: they need transactions, indexes and
 concurrent writers, and every symptom below is one of those three missing.
@@ -27,7 +27,7 @@ Redis earns its place on the things Postgres is genuinely poor at:
 | login rate limiting | a write per attempt, discardable, needs no durability |
 | worker/scheduler leases | `SET NX PX` is the primitive; a lease file over NFS is not |
 | SSE fan-out to N web replicas | pub/sub; polling the DB per connection does not scale |
-| hot reads (workspace listings) | cache, invalidated on write |
+| hot reads (project listings) | cache, invalidated on write |
 
 **The tables are code.** `foldrun-platform/src/schema.ts` is Drizzle's
 description of every table, and every query in the platform and the web
@@ -64,7 +64,7 @@ because the list of what was wrong is the argument for the order below.
 | no login rate limiting at all | **fixed** — per-account, and per-IP behind a proxy |
 | the ledger summed a file it had just read, so two admissions saw one balance | **fixed** — summed by the database |
 | nothing recorded what PEOPLE did | **fixed** — audit log |
-| the scheduler scans every tenant × workspace × flow every 30s | **open** — needs `next_fire_at` |
+| the scheduler scans every tenant × project × flow every 30s | **open** — needs `next_fire_at` |
 | `/api/metrics` parses every run file to answer one number | **open** — do not scrape it yet |
 
 ## Order, and why this order
@@ -131,7 +131,7 @@ production box, not merely written.
      claims are reclaimable at any time rather than only at boot, which is what
      lets a second worker pick up after a first is killed.
    - Still to do: a `next_fire_at` index so the scheduler stops scanning every
-     tenant × workspace × flow every 30s, and a runs index so `/api/metrics`
+     tenant × project × flow every 30s, and a runs index so `/api/metrics`
      stops reading every file. Do not scrape metrics until that lands.
 5. **Multi-node.** **The blockers are gone.** The queue claims with
    `FOR UPDATE SKIP LOCKED` and the worker lease is a Redis `SET NX PX` — a
@@ -140,7 +140,7 @@ production box, not merely written.
    Redis: two claimants, exactly one winner; a holder can renew; a non-holder
    can neither take nor release; and it expires with nobody releasing it.
    What is left before `replicas: 2` is not correctness but storage: the run
-   RECORDS and the workspaces are still files on a ReadWriteOnce volume, so a
+   RECORDS and the projects are still files on a ReadWriteOnce volume, so a
    second worker has to land on the same node. RWX, or moving run records to
    Postgres, is the remaining step.
 
