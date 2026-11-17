@@ -91,7 +91,7 @@ other.
 Agent import works inside one account. To move a desk to another account or
 installation — or to hand someone a flow — export it as a `.zip`:
 
-- **A workspace:** Settings → **Export and import** → **Export workspace**.
+- **A workspace:** Settings → **Export and import** → **Export project**.
 - **A flow:** **Export** on its card on the Flows page. The package holds the
   flow, every flow it runs as a step, every agent those steps name (with
   `on-fail:`, `delegate:` and the colleagues those agents consult or delegate to),
