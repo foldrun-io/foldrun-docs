@@ -86,7 +86,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: no browser-native controls (@foldrun/ui check-native)
-        run: npx --no-install foldrun-ui-check-native src *.md
+        run: npx --no-install foldrun-ui-check-native src ./*.md
       - name: no raw HTML, script URLs or code from text (@foldrun/ui check-security, OWASP A03)
         run: npx --no-install foldrun-ui-check-security src
       - run: npx --no-install astro check
