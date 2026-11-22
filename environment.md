@@ -30,6 +30,7 @@ setting and never editable from a web page.
 
 | setting | variable (fallback) | default | |
 |---|---|---|---|
+| `models.byok` | `FOLDRUN_BYOK` | `false` | Accounts may bring their own model key or endpoint (Settings → Models, `provider:` in their files). Off: every model call goes through the platform's models — foldrun's models on the hosted platform, the install's own credential on a self-hosted one — a stored key is never read, and a `provider:` is refused ([`config/own-model-key`](checks.md#config-own-model-key)). Owners only. Asks for a reason when turned on. |
 | `signup.open` | `FOLDRUN_OPEN_SIGNUP` | `false` | Strangers may create accounts. Off: invite-only once the first account exists. Owners only. Asks for a reason when turned on. On foldrun's hosted platform it is labelled **Free sign-up**: an account without paying. |
 | `plan.concurrency` | `FOLDRUN_PLAN_CONCURRENCY` | unset | Runs one account drives at once when its plan says nothing. 0: no cap. |
 | `plan.workspaces` | `FOLDRUN_PLAN_WORKSPACES` | unset | Projects an account may create when its plan says nothing. 0: no cap. |
