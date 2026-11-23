@@ -30,7 +30,7 @@ host the pods.
 
 **Stage C — big SaaS.** Trigger: any of — a second WORKER needed (control
 plane saturated), an HA contract (runs survive host failure), measured
-queue depth one host can't drain (see /api/metrics — this is why it
+queue depth one host can't drain (see /v1/metrics — this is why it
 exists).
 - Postgres: runs, queue (`SELECT … FOR UPDATE SKIP LOCKED`), ledger,
   sessions. The queue lives in the SAME database as the run records so a
@@ -66,5 +66,5 @@ grammar, not the runner's semantics, not the UI.
   every project on a shared filesystem.
 - Backups are only backups once they're off the box (R2 `backups/`,
   14-day rotation local, 15-day remote).
-- /api/metrics is the tripwire: alert on `foldrun_queue_oldest_pending_seconds`
+- /v1/metrics is the tripwire: alert on `foldrun_queue_oldest_pending_seconds`
   sustained above ~600 — that is Stage C's trigger becoming measurable.

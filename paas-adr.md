@@ -65,7 +65,7 @@ because the list of what was wrong is the argument for the order below.
 | the ledger summed a file it had just read, so two admissions saw one balance | **fixed** — summed by the database |
 | nothing recorded what PEOPLE did | **fixed** — audit log |
 | the scheduler scans every tenant × project × flow every 30s | **open** — needs `next_fire_at` |
-| `/api/metrics` parses every run file to answer one number | **open** — do not scrape it yet |
+| `/v1/metrics` parses every run file to answer one number | **open** — do not scrape it yet |
 
 ## Order, and why this order
 
@@ -131,7 +131,7 @@ production box, not merely written.
      claims are reclaimable at any time rather than only at boot, which is what
      lets a second worker pick up after a first is killed.
    - Still to do: a `next_fire_at` index so the scheduler stops scanning every
-     tenant × project × flow every 30s, and a runs index so `/api/metrics`
+     tenant × project × flow every 30s, and a runs index so `/v1/metrics`
      stops reading every file. Do not scrape metrics until that lands.
 5. **Multi-node.** **The blockers are gone.** The queue claims with
    `FOR UPDATE SKIP LOCKED` and the worker lease is a Redis `SET NX PX` — a

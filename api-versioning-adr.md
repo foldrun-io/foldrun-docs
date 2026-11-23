@@ -9,10 +9,11 @@ a plan.
   23 Nov 2026, owner: "like Stripe modern, having a v number"; until then "a header, never the
   path"). On the API host every platform route is under `/v1`, beside the model routes, as
   Stripe's (`/v1` + `Stripe-Version`) and Anthropic's (`/v1` + `anthropic-version`) are.
-  `/v1` moves to `/v2` only if the whole style of the API changes, never for one break. The
-  API host's nginx maps `/v1/<route>` to `/api/<route>` (contract: foldrun-web
-  `server/v1-path.ts`, held by foldrun-infra `dev/ci/api-host-routes.sh`), so every handler
-  and check reads one spelling; `/api/…` stays, the dashboard's door and the older spelling.
+  `/v1` moves to `/v2` only if the whole style of the API changes, never for one break.
+  Every route of the app is its own `/v1` path (`app/v1/…`), on the API host and on the
+  dashboard's address alike; nothing maps one path to another, and `/api` is gone (owner,
+  23 Nov 2026: "a unified format for our URLs"). The gateway's model routes and the
+  dashboard-only list are held by foldrun-infra `dev/ci/api-host-routes.sh`.
 - **The version is a header.** The request header is `Foldrun-Version: YYYY-MM-DD`. Every response
   says which version answered it (`Foldrun-Version`). It also carries `X-Foldrun-Api`, the
   server's current version, and `X-Foldrun-Cli`, the CLI released with it.

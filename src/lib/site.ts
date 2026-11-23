@@ -13,13 +13,19 @@ export const APP_URL = (import.meta.env.PUBLIC_APP_URL ?? "https://dash.foldrun.
 /** The dashboard's host, for words. */
 export const APP_HOST = new URL(APP_URL).host;
 
+/** The platform's API: every call goes to the API host, every route
+ *  /v1/<route> (23 Nov 2026). Sign-up switches, prices and status are open
+ *  reads, so no session is needed. Dev's builds set
+ *  PUBLIC_API_URL=https://api.foldrun.dev. */
+export const API_URL = `${(import.meta.env.PUBLIC_API_URL ?? "https://api.foldrun.io").replace(/\/+$/, "")}/v1`;
+
 export const signIn = `${APP_URL}/login`;
 export const signUp = `${APP_URL}/signup`;
 
-/** GET <app>/api/signup: whether sign-up is open; buttons marked signup follow it. */
-export const SIGNUP_API = `${APP_URL}/api/signup`;
+/** GET <api>/signup: whether sign-up is open; buttons marked signup follow it. */
+export const SIGNUP_API = `${API_URL}/signup`;
 /** The platform's status, for the footer's dot. */
-export const STATUS_API = import.meta.env.PUBLIC_STATUS_API ?? `${APP_URL}/api/status`;
+export const STATUS_API = import.meta.env.PUBLIC_STATUS_API ?? `${API_URL}/status`;
 export const CONTACT = "hello@foldrun.io";
 
 /** The header: a few doc entry points, then the way back to foldrun.io. */
