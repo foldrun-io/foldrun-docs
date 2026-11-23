@@ -5,10 +5,17 @@ a plan.
 
 ## Where the version lives
 
-- **A header, never the path.** The request header is `Foldrun-Version: YYYY-MM-DD`. Every response
+- **The path carries the generation, the header carries every change inside it** (changed
+  23 Nov 2026, owner: "like Stripe modern, having a v number"; until then "a header, never the
+  path"). On the API host every platform route is under `/v1`, beside the model routes, as
+  Stripe's (`/v1` + `Stripe-Version`) and Anthropic's (`/v1` + `anthropic-version`) are.
+  `/v1` moves to `/v2` only if the whole style of the API changes, never for one break. The
+  API host's nginx maps `/v1/<route>` to `/api/<route>` (contract: foldrun-web
+  `server/v1-path.ts`, held by foldrun-infra `dev/ci/api-host-routes.sh`), so every handler
+  and check reads one spelling; `/api/…` stays, the dashboard's door and the older spelling.
+- **The version is a header.** The request header is `Foldrun-Version: YYYY-MM-DD`. Every response
   says which version answered it (`Foldrun-Version`). It also carries `X-Foldrun-Api`, the
-  server's current version, and `X-Foldrun-Cli`, the CLI released with it. URLs stay
-  `/api/…` for good.
+  server's current version, and `X-Foldrun-Cli`, the CLI released with it.
 - **Which version answers a request:**
   1. the header;
   2. else the account's pin, for an API key only;
