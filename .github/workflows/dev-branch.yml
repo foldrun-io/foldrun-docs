@@ -1,0 +1,40 @@
+name: dev-branch
+
+# The `dev` branch follows main (23 Nov 2026, owner: dev everywhere).
+# Cloudflare Pages builds it as a preview with the project's Preview
+# variables, which point every link at dev (dash.foldrun.dev and the dev
+# site and docs), and serves that build on the dev name: foldrun.dev for
+# the site, docs.foldrun.dev for the docs (foldrun-infra dev/cloudflare/
+# zones/foldrun.dev/pages.json). Main stays production (foldrun.io,
+# docs.foldrun.io). A ref moved through the API is still a push to the
+# Pages app, so the preview builds with no further step.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dev-branch
+  cancel-in-progress: true
+
+jobs:
+  follow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: dev = main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/$REPO/git/ref/heads/dev" >/dev/null 2>&1; then
+            gh api -X PATCH "repos/$REPO/git/refs/heads/dev" -f sha="$SHA" -F force=true >/dev/null
+          else
+            gh api -X POST "repos/$REPO/git/refs" -f ref=refs/heads/dev -f sha="$SHA" >/dev/null
+          fi
+          echo "dev is $SHA"

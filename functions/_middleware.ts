@@ -4,8 +4,8 @@
 // docs.foldrun.io, and search engines treat those as two sites with the same
 // content. The production alias redirects to the real domain, permanently,
 // so nothing is ever indexed there. Branch previews (anything else under
-// .pages.dev) keep serving — that is what they are for — but with a header
-// that keeps them out of every index.
+// .pages.dev) and dev (docs.foldrun.dev) keep serving — that is what they
+// are for — but with a header that keeps them out of every index.
 
 const CANONICAL = "docs.foldrun.io";
 const PRODUCTION_ALIAS = "foldrun-docs-f24.pages.dev";
@@ -22,7 +22,9 @@ export const onRequest = async ({ request, next }: Context): Promise<Response> =
     return Response.redirect(url.toString(), 301);
   }
   const res = await next();
-  if (url.hostname.endsWith(".pages.dev")) {
+  // Anything but the real domain: branch previews and dev (docs.foldrun.dev,
+  // 23 Nov 2026 — the foldrun.dev zone also sets this header on every name).
+  if (url.hostname !== CANONICAL) {
     const out = new Response(res.body, res);
     out.headers.set("X-Robots-Tag", "noindex, nofollow");
     return out;
