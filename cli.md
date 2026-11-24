@@ -867,6 +867,7 @@ it takes, as before (also when the output goes to a file).
 | `/permissions strict` | on this computer a few commands that only look run without a question: `pwd`, `date`, `ls`, and `git status`, `diff`, `log`, `show`, `ls-files`, `rev-parse`, `branch` — only in a plain form (one command, no pipe, redirect, quote, variable or glob, no path outside the folder), with only the options foldrun names, run in the session's folder with git's hooks, monitor program, signature check and outside diff tools off. A git lookup is asked after all when the folder is not the repository's own top, when the repository's config names anything beyond the plain settings (a filter, an include), or — for `status`, `diff` and `ls-files` — when a filter program such as Git LFS is configured. `ls` is asked for a path that leads out of the folder through a link. Anything else is asked. `strict` asks for these too; `/permissions relaxed` goes back |
 | `/cost` | what the session has spent |
 | `/cost explain` | where it went, the largest first: one row for each thing that used the model — a turn on this computer, a sub-agent's job, a turn in the cloud, a cloud agent — with the model that served it, model calls, tokens read, the share that came from the prompt cache, tokens written to the cache, tokens out, cost and who paid. Below it the totals, and the one biggest cause in a sentence. A cache miss is measured, not guessed: when the turn before left a conversation in the cache and less than half of it was read back, the turn is named, with how long had passed — the likely reason is offered as likely. A cloud run's cost is what its record holds, and those rows add up to `/cost`; who paid is read from the run (the account's credits, your own model key, or the gateway's meter). A turn on this computer is metered at the gateway by the key, not turn by turn, so its cost is worked out from its tokens at the listed prices (`foldrun usage rates`) and marked `≈`: an estimate. It counts what a stopped or failed turn had already used. The rows are kept on this computer (`~/.foldrun/code-cost/`, one file for a conversation of a project in a folder); in a session they are the ones since this terminal opened it |
+| `/cost tips on\|off` | token hints: one line before a turn that would read the whole conversation again — back after the cache expired (an hour on foldrun's API), a new `/model`, a change to effort, `/thinking` or the MCP tools, a move between this computer and the cloud, a conversation over about 120k tokens, a message over about 20k tokens — with its size, its cost at the model's listed price and the cheaper way (`/compact`, `/clear`, a path instead of a paste). Each kind once a session; `/cost explain` lists the ones given; off is kept for you in every folder. See [Saving tokens](#saving-tokens) |
 | `/usage` | your foldrun plan, the plan credit left and when it resets, and bought credit left. `foldrun usage` has the tables by project, model and day |
 | `/context` | what fills the agent's context: foldrun's own instructions, the folder's `AGENTS.md` / `CLAUDE.md`, the skills list, the conversation so far, and what the last turn read — "read 126k tokens (118k cached) in 5 model calls". Every model call of a turn reads the whole context again; what is cached is billed at the model's cached rate. On a `--continue`d session the conversation's size shows after your first turn |
 | `/compact [what to keep]` | shortens the conversation kept on this computer to the agent's own summary of it, so a long session stays fast; if the summary turn does not finish, the conversation stays as it was. The cloud keeps its own conversation: `/clear` starts a fresh one |
@@ -962,3 +963,23 @@ foldrun open runs                  # the same, in the browser
 Previews of a branch come back with the GitHub and GitLab app; until then a
 second project (`foldrun deploy --to leads-try`) is the place to try a
 change.
+
+## Saving tokens
+
+Every model call in a `foldrun code` turn reads the whole conversation again. What it read
+on the call before is cached, and a cached read costs about a tenth of a fresh one, so most
+turns pay little for the history. A few things make the next call read it all at full price:
+
+| What | Why it costs | The cheaper way |
+|---|---|---|
+| a break past the cache's life | foldrun's API keeps a cache an hour after its last use | `/compact` before you leave; `/clear` for a new task |
+| `/model` mid-conversation | a cache belongs to one model | `/compact` or `/clear` first |
+| `/effort`, `/thinking`, `/mcp on\|off` | what is sent ahead of the conversation changed | settle these at the start |
+| moving between this computer and the cloud | the other side's cache is cold: its first message reads its own context at full price | stay where the work is |
+| a conversation over about 120k tokens | every call reads all of it | `/compact` |
+| a long paste | every later call reads it again | give the path; the agent opens it when it needs it |
+
+foldrun code says so once, in one line, before the turn it applies to, with the size and what it
+comes to at the model's listed price where it is known (`/cost tips off` turns these off; `/cost explain` lists the
+ones given).
+
