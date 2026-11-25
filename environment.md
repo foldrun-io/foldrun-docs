@@ -254,6 +254,10 @@ self-hosted install reads the variable as before.
 | `FOLDRUN_TOOL_CACHE_SEARCH_S` | seconds a `/v1/messages` `web_search` answer is kept in Redis for the same account's identical search, default 600; `0` turns the cache off. Never shared between accounts; answers that may carry a credential are not kept. `web_fetch` is not cached |
 | `FOLDRUN_TOOL_CACHE_REDIS_SHARE` | the most of Redis's `maxmemory` the search cache may fill, default 0.5 (at most 0.9): Redis also holds the worker, scheduler and egress leases and refuses writes when full, so the cache stops writing first |
 | `FOLDRUN_TOOL_CACHE_REDIS_MB` | the search cache's cap in MB when Redis has no `maxmemory` set, default 128 |
+| `FOLDRUN_TOOL_PER_ACCOUNT` | how many `/v1/messages` `web_search` / `web_fetch` calls one account runs at once on one gateway process, across all its keys, default 16; cache hits are not counted |
+| `FOLDRUN_TOOL_PER_PROCESS` | how many of those calls one gateway process runs at once for every account together, default 128 |
+| `FOLDRUN_TOOL_WAIT_MS` | how long a call over either cap waits for a slot before it answers `too_many_requests`, default 10000 |
+| `FOLDRUN_TOOL_MAX_WAITING` | how many of those calls may wait for a slot at once on one gateway process, default 256; past it a call answers `too_many_requests` at once |
 | `FOLDRUN_SEARCH_IMAGE` | the SearXNG image for per-account search pods, by digest |
 | `FOLDRUN_BROWSER_PER_ACCOUNT` | `1` (k8s only) gives each account its own browser pod in the run namespace — a Playwright server on the runner image — started on the first step whose `web` tool may browse, handed to the step as `FOLDRUN_BROWSER_WS`, reaped when idle, billed to the account as default-size compute plus network. A pod the cluster will not give means that same engine runs inside the step; a test run is never handed one |
 | `FOLDRUN_BROWSER_IDLE_MS` | how long an account's browser pods may sit unused before the pool is reaped, default 900000 (15 minutes) |
