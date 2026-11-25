@@ -312,10 +312,14 @@ Signing in, in particular:
   foldrun's hosted platform, on any install with its own mail sender, and
   where `FOLDRUN_REQUIRE_EMAIL_CONFIRMATION=1`; a self-hosted install that
   cannot send mail can never confirm anyone, so there nothing is held back.
-  Known limit: if the inbox's owner confirms the address from the sign-up
-  mail instead of resetting the password, the first signer's session and
-  password stay; the confirmation mail tells anyone who did not sign up to use "Forgot
-  password" instead;
+  Opening a confirmation link confirms nothing: it shows the address and a
+  button, so a mail scanner that opens every link in a message cannot
+  confirm a stranger's sign-up for you (the email-change link likewise moves
+  nothing until its button is pressed). The page, and the mail, tell anyone
+  who did not sign up to reset the password instead of confirming. Known
+  limits: a person who presses Confirm on a sign-up that was not theirs,
+  or a mail scanner that goes further and submits the forms it finds,
+  leaves the first signer's session and password in place;
 - sign-in codes, reset links, address confirmations, invites and security
   notices always go out through the platform's own mail sender, never an
   account's own: each carries a secret that signs someone in, and the
