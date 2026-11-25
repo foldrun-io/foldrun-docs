@@ -299,9 +299,11 @@ Signing in, in particular:
   around but cannot make anything that would outlast a password reset: no
   API keys (including the one `foldrun login` makes), no two-step sign-in,
   no connected apps (MCP OAuth or machine clients), no team invites, no
-  public file links and no webhook URLs through the API (it sees that links
-  exist, not their tokens; the dashboard's settings and storage pages and
-  `storage/public` publishing get the same rule next). The answer is a `403` with `code: "email_unconfirmed"`. Anyone can
+  public file links and no webhook URLs, through the API or on a dashboard
+  page (it sees that links and hooks exist, not their tokens). Files an
+  agent publishes under `storage/public` are the project's, not a person's:
+  their links are made by the project and listed in the project's storage,
+  so they are not held back and a reset does not end them. The answer is a `403` with `code: "email_unconfirmed"`. Anyone can
   sign up with someone else's address; when the real owner of that inbox
   first proves it with a password reset, every session ends and whatever the
   login made before is revoked — its API keys, connected apps and pending
