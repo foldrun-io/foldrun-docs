@@ -7,6 +7,16 @@ runs on hosted services only. Owner's split (2 Nov): **private repos on
 CircleCI** (its free plan), **public repos on GitHub Actions** (free and
 unlimited for them, npm provenance only there, fork-safe).*
 
+> **Now (27 Nov 2026): no CircleCI.** Since 13 Nov 2026 the private repos'
+> jobs and the dev pipeline run on GitHub Actions on foldrun's own EC2 machine,
+> a self-hosted runner (foldrun-infra `ci/`, label `foldrun-ci`). On 27 Nov
+> CircleCI was removed everywhere (FOL-404): each private repo's
+> `.github/workflows/ci.yml` runs the same `checks` and `security` jobs on
+> that runner, generated from foldrun-infra `dev/ci/repo-ci/ci.yml.tmpl`, and
+> the site's and brand's `release` tag job was dropped (nothing read the
+> tags). The CircleCI contexts below are no longer used. The rest of this
+> page is the 3 Nov design.
+
 ## The same gate in every repo
 
 Two files decide what every repo's CI does, the same bytes everywhere, synced
