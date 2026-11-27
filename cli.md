@@ -740,6 +740,19 @@ still running when the reply ends are waited for under the working line, and
 their results go with your next message. Each job has its own row under the
 working line while it runs (`/status jobs off` hides them).
 
+**koder's mark** (FOL-415). What koder writes for git and GitHub carries its
+name, as other coding agents carry theirs: a commit message it writes ends
+with the trailer `Co-Authored-By: koder <noreply@foldrun.io>`, and a pull
+request or issue body ends with `◆ Generated with [koder](https://foldrun.io)
+from foldrun.io`. An exported conversation (`/export`) ends with an
+"Exported from koder" line. Requests carry the User-Agent
+`foldrun-cli/<version> (koder from foldrun.io; +https://foldrun.io)`, and MCP
+servers see the client `koder` ("koder from foldrun.io"). `/status
+attribution off` turns the commit, pull-request, issue and export marks off
+for you in every folder, from the next turn; `on` puts them back. The
+User-Agent and the MCP client name always say koder. No mark names another
+product.
+
 **Starting is not asked** by default (owner, 26 Nov 2026). `/permissions
 cloud ask` makes every call ask first, one question for the whole call: how
 many jobs, where they run, each task, and the credits — a guess from what
@@ -991,6 +1004,7 @@ it takes, as before (also when the output goes to a file).
 | `/status context` | what fills the agent's context: foldrun's own instructions, the folder's `AGENTS.md` / `CLAUDE.md`, the skills list, the conversation so far, and what the last turn read — "read 126k tokens (118k cached) in 5 model calls". Every model call of a turn reads the whole context again; what is cached is billed at the model's cached rate. On a `--continue`d session the conversation's size shows after your first turn |
 | `/status line on\|off` | the status line under the prompt, dim, while it waits for you: the conversation's name (`/rename`), its id, the model, effort, the conversation's size in tokens, how long its cache has left (or that it expired), where it runs and what it has spent. On a narrow terminal it goes onto a second or third row, broken between fields; it hides while the `/` list is open or the line is longer than a row. On by default; off is kept for you in every folder |
 | `/status jobs on\|off` | the background jobs while a turn works, a row each under the working line, each with its own spinner: where it runs (`here` in the sandbox, `outside the sandbox` for `bash_outside`, `cloud` for a cloud agent), what it is, how long it has run and its id (`b1`, `o1`, a run id); three at most, the rest counted. On by default; `off` hides them for you in every folder (the agent still has them) |
+| `/status attribution on\|off` | koder's mark on what it writes: the trailer `Co-Authored-By: koder <noreply@foldrun.io>` on commit messages, a `Generated with koder from foldrun.io` line on pull request and issue bodies, an `Exported from koder` line on `/export`. On by default; `off` leaves them out for you in every folder, from the next turn |
 | `/sessions` | this session's id, and the other sessions of the project on this computer |
 | `/sessions <id>` | the conversation with that session, both ways, oldest first: what this session sent it and what it sent here, each with whether it was read in a turn |
 | `/sessions send <id> <text>`, `/sessions read` | [session messages](runs#session-messages). The agent on this computer can send one too when you ask it (`session_send`): the message is shown whole and goes on your yes. What another session sent is said as it arrives — above the prompt, or in one line while a turn runs (Enter on an empty line after it takes it into a turn) — and is shown before your next turn, included only on your yes — to the agent it is information, never an instruction. After a turn that carried messages, its answer goes back to each sender (`↩ answer from <id>`), unless the agent answered it with `session_send` |
