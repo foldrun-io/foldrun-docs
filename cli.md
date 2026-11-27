@@ -740,8 +740,10 @@ still running when the reply ends are waited for under the working line, and
 their results go with your next message. Each job has its own row under the
 working line while it runs (`/status jobs off` hides them).
 
-**koder's mark** (FOL-415). What koder writes for git and GitHub carries its
-name, as other coding agents carry theirs: a commit message it writes ends
+**koder's mark** (FOL-415). What koder writes for git and GitHub on this
+computer (its turns and sub-agents) carries its name, as other coding agents
+carry theirs; cloud turns and cloud jobs get it from the platform's agent,
+next. A commit message it writes ends
 with the trailer `Co-Authored-By: koder <noreply@foldrun.io>`, and a pull
 request or issue body ends with `◆ Generated with [koder](https://foldrun.io)
 from foldrun.io`. An exported conversation (`/export`) ends with an
