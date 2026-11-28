@@ -49,6 +49,13 @@ setting and never editable from a web page.
 | `room.run_memory_gib` | `FOLDRUN_RUN_MEMORY_GIB` | unset | Memory the run namespace may reserve; a step waits for room past it. 0: no limit. Never on an autoscaled cluster. Owners only. |
 | `room.run_disk_gib` | `FOLDRUN_RUN_DISK_GIB` | unset | Disk the run namespace's pods may be allowed together; a step waits past it. 0: no limit. Never on an autoscaled cluster. Owners only. |
 | `queue.max_waiting_runs` | `FOLDRUN_MAX_WAITING_RUNS` | unset | New runs are refused while an account has this many waiting for their turn. Unset: the account's plan sets it (hosted), else 20 for each run it may drive at once, at least 50. 0: no cap. See [runs waiting](budgets-and-billing#how-many-runs-may-wait). |
+| `admission.enabled` | `FOLDRUN_ADMISSION` | `true` | Deploys, run starts and uploads take a permit per account before they touch the database. Off: nobody is turned away at the door. See [busy answers](api-usage#busy-at-the-door). |
+| `admission.deploy_per_account` | `FOLDRUN_ADMISSION_DEPLOY` | `2` | Deploys one account may have in progress; the next is answered `429` with `Retry-After`. 0: no cap. |
+| `admission.run_start_per_account` | `FOLDRUN_ADMISSION_RUN_START` | `2` | Runs one account may be starting at the same moment (the start, not the run). 0: no cap. |
+| `admission.upload_per_account` | `FOLDRUN_ADMISSION_UPLOAD` | `4` | File uploads one account may have in progress. 0: no cap. |
+| `admission.install_cap` | `FOLDRUN_ADMISSION_INSTALL_CAP` | `0` | Deploys, starts and uploads at once across every account; past it a request is answered `503` with `Retry-After`. Answers, approvals, stops and a worker finishing a step never count against it. 0: no cap. |
+| `admission.retry_after_seconds` | `FOLDRUN_ADMISSION_RETRY_AFTER` | `3` | What a turned-away request is told to wait. |
+| `admission.permit_seconds` | `FOLDRUN_ADMISSION_PERMIT_SECONDS` | `120` | Longest a permit is held; one a request never gave back lapses after this. Owners only. |
 | `pods.search_max` | `FOLDRUN_SEARCH_MAX_PODS` | `3` | The most search pods one account's pool grows to. |
 | `pods.browser_max` | `FOLDRUN_BROWSER_MAX_PODS` | `4` | The most browser pods one account's pool grows to. |
 | `pods.browser_vcpu` | `FOLDRUN_BROWSER_VCPU` | `1` | vCPU a browser pod (an account's pool pod and the per-step browse pod) holds: its request and its limit, always equal, and what its seconds are billed at. A pod keeps the size it was made with. Owners only. |
